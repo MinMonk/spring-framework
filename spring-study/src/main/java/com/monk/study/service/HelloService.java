@@ -1,5 +1,7 @@
 package com.monk.study.service;
 
+import com.monk.study.bean.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -9,10 +11,17 @@ import org.springframework.stereotype.Service;
  * @Date 2020/10/23
  * @Version V1.0
  **/
-@Service
+@Service("helloService")
 public class HelloService {
+
+	@Value("zhangsan")
+	private User user;
 
 	public void sayHello(){
 		System.out.println("hello word");
+	}
+
+	public void sayHello1(){
+		System.out.println("hello " + user.getUserName());
 	}
 }
