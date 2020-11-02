@@ -412,7 +412,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object result = existingBean;
 		for (BeanPostProcessor processor : getBeanPostProcessors()) {
-			Object current = processor.postProcessBeforeInitialization(result, beanName);
+				Object current = processor.postProcessBeforeInitialization(result, beanName);
 			if (current == null) {
 				return result;
 			}
@@ -503,19 +503,24 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 			/**
-			 * 用户自定义的PostProcessor创建Bean方法
 			 *
 			 * 这里需要注意两个单词的区别：
 			 * 		1. Instantiation   实例化
 			 * 		2. Initialization  初始化
 			 *
-			 * 	这两个点都是spring提供的扩展点，通过实现BeanPostProcessor接口来重写下面的方法来扩展
-			 * 	PostProcessor[Before|After]Instantiation就是实例化前后的扩展点（这里都实例化了，自然
-			 * 	如果实例化后的结果不为空，直接返回就可以了）
+			 * 	扩展点一：
+			 * 	通过实现InstantiationAwareBeanPostProcessor接口来重写下面的方法来扩展
+			 * 	PostProcessor[Before|After]Instantiation就是实例化前后的扩展点
+			 * 	如果实例化后的对象不为空，就直接到初始化后这一步（AOP就是在这一步实现的）
 			 *
-			 * 	PostProcessor[Before|After]Initialization则是初始化前后的扩展点，这里是通过改变BeanDefinition来
-			 * 	干涉bean的实例化过程（spring的bean是根据BeanDefinition来创建的），和上面的直接实例化出来对象还是有区别的
-			 *  重写这两个方法的时候，需要注意：如果返回的不是null，则会终止bena初始化的链
+			 * 	扩展点二：
+			 * 	通过实现MergedBeanDefinitionPostProcessor接口来重写下面的方法来扩展
+			 * 	重写postProcessMergedBeanDefinition方法是通过修改BeanDefinition的属性来干预Bean的创建过程
+			 *
+			 *  扩展点三：
+			 *  通过实现BeanPostProcessor接口来重写下面的方法来扩展,BeanPostProcessor是InstantiationAwareBeanPostProcessor的父类
+			 * 	PostProcessor[Before|After]Initialization则是初始化前后的扩展点，
+			 *  重写这两个方法的时候，需要注意：如果返回的是null，则会终止bena初始化的执行链
 			 */
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
@@ -585,6 +590,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		synchronized (mbd.postProcessingLock) {
 			if (!mbd.postProcessed) {
 				try {
+					// 扩展点：处理实现了MergedBeanDefinitionPostProcessor接口的逻辑
 					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
 				}
 				catch (Throwable ex) {
@@ -610,7 +616,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
+			/**
+			 * 扩展点：处理实现了InstantiationAwareBeanPostProcessor接口的逻辑
+			 * 依次执行以下方法
+			 * 	1. postProcessAfterInstantiation()
+			 * 	2. postProcessProperties()
+			 * 	3. postProcessPropertyValues()
+			 */
 			populateBean(beanName, mbd, instanceWrapper);
+
+			// 实例化Bean逻辑，该方法中也有可扩展的地方
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1131,6 +1146,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				Class<?> targetType = determineTargetType(beanName, mbd);
 				if (targetType != null) {
 					bean = applyBeanPostProcessorsBeforeInstantiation(targetType, beanName);
+					/**
+					 * 如果重写postProcessBeforeInstantiation()方法，该方法返回的对象不是空，
+					 * 那么就不会执行postProcessAfterInstantiation()方法
+					 */
 					if (bean != null) {
 						bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
 					}
@@ -1803,11 +1822,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
-			// 扩展点一：初始化前
+			// 扩展点：BeanPostProcessor.postProcessBeforeInitialization()
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
 		try {
+			// 扩展点：InitializingBean.afterPropertiesSet()
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {
@@ -1816,7 +1836,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
-			// 扩展点一：初始化后
+			// 扩展点：BeanPostProcessor.postProcessAfterInitialization()
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 

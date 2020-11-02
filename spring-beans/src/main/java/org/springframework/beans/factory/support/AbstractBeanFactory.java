@@ -305,7 +305,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
-						// 判断是否是类上加了@dependOn，这种方式的循环依赖，是不允许的，直接抛出异常
+						// 判断是否是类上加了@DependOn，这种方式的循环依赖，是不允许的，直接抛出异常
 						// 但是如果是通过@Autowired @Resource这种是允许的
 						if (isDependent(beanName, dep)) {
 							throw new BeanCreationException(mbd.getResourceDescription(), beanName,
