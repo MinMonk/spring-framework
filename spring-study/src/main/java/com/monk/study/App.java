@@ -20,6 +20,7 @@ public class App {
 
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+		ctx.getBean("");
 
 	}
 }
