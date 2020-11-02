@@ -502,6 +502,21 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			/**
+			 * 用户自定义的PostProcessor创建Bean方法
+			 *
+			 * 这里需要注意两个单词的区别：
+			 * 		1. Instantiation   实例化
+			 * 		2. Initialization  初始化
+			 *
+			 * 	这两个点都是spring提供的扩展点，通过实现BeanPostProcessor接口来重写下面的方法来扩展
+			 * 	PostProcessor[Before|After]Instantiation就是实例化前后的扩展点（这里都实例化了，自然
+			 * 	如果实例化后的结果不为空，直接返回就可以了）
+			 *
+			 * 	PostProcessor[Before|After]Initialization则是初始化前后的扩展点，这里是通过改变BeanDefinition来
+			 * 	干涉bean的实例化过程（spring的bean是根据BeanDefinition来创建的），和上面的直接实例化出来对象还是有区别的
+			 *  重写这两个方法的时候，需要注意：如果返回的不是null，则会终止bena初始化的链
+			 */
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
 				return bean;
@@ -513,6 +528,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		try {
+			/**
+			 *  spring默认的创建bean方法
+			 *  如果用户没有自定义PostProcessor或者用户自定了PostProcessor但是返回null，那么spring还是会继续
+			 *  使用自己的创建Bean方法来创建Bean
+			 */
 			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Finished creating instance of bean '" + beanName + "'");
@@ -1783,6 +1803,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
+			// 扩展点一：初始化前
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
@@ -1795,6 +1816,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
+			// 扩展点一：初始化后
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 

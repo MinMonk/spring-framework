@@ -186,8 +186,17 @@ public abstract class ClassUtils {
 	 */
 	@Nullable
 	public static ClassLoader getDefaultClassLoader() {
+		/**
+		 * 先获取当前线程的类加载器，也就是jvm的加载
+		 * 	1. 可以通过applicationContext.getBeanFactory().setClassLoader()来修改为自定义的ClassLoader
+		 * 	2. 也可以通过Thread.currentThread().setContextClassLoader()来修改为自定义的ClassLoader
+		 *
+		 * 如果上一步获取的ClassLoader为空，再获取ClassUtils类的类加载器
+		 * 如果上一步获取的ClassLoader为空，最后获取系统指定的类加载器
+		 */
 		ClassLoader cl = null;
 		try {
+			//appClassLoader，如果是tomcat的话，就是WebappClassLoader
 			cl = Thread.currentThread().getContextClassLoader();
 		}
 		catch (Throwable ex) {
@@ -195,10 +204,16 @@ public abstract class ClassUtils {
 		}
 		if (cl == null) {
 			// No thread context class loader -> use class loader of this class.
+			/**
+			 * 当前类ClassUtils本身的类加载器
+			 *
+			 * 一般情况下，这一步是不会为空的，但是如果是bootstrap启动的话，这里才可能为空
+			 */
 			cl = ClassUtils.class.getClassLoader();
 			if (cl == null) {
 				// getClassLoader() returning null indicates the bootstrap ClassLoader
 				try {
+					// 在启动的时候，通过配置jvm的-D这种参数设置系统指定的类加载器
 					cl = ClassLoader.getSystemClassLoader();
 				}
 				catch (Throwable ex) {
