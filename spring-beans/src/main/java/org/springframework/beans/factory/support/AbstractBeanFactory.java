@@ -243,6 +243,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			String name, @Nullable Class<T> requiredType, @Nullable Object[] args, boolean typeCheckOnly)
 			throws BeansException {
 
+		/**
+		 * 对用户传进来的beanName进行转换，转换为唯一的beanName
+		 *
+		 * PS：
+		 * 类有且仅有一个beanName，同时还有多个别名aliasName，以及特殊的FactoryBean（这类Bean的beanName以“&”开头）
+		 */
 		String beanName = transformedBeanName(name);
 		Object bean;
 

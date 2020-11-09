@@ -127,6 +127,11 @@ public class InjectionMetadata {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Processing injected element of bean '" + beanName + "': " + element);
 				}
+				/**
+				 * 注意这里的inject方法，InjectedElement类他还有两个子类AutowiredFieldElement 和 AutowiredMethodElement
+				 * 这两个子类分别重写了父类的inject方法
+				 */
+
 				element.inject(target, beanName, pvs);
 			}
 		}

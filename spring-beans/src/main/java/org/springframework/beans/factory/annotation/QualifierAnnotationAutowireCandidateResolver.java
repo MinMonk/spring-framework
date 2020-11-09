@@ -358,11 +358,14 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	/**
+	 *
+	 * 根据入参注解找到注解所需要注入的值
 	 * Determine a suggested value from any of the given candidate annotations.
 	 */
 	@Nullable
 	protected Object findValue(Annotation[] annotationsToSearch) {
 		if (annotationsToSearch.length > 0) {   // qualifier annotations have to be local
+			// this.valueAnnotationType在这里就是@Value，这个属性的默认值就是Value.class
 			AnnotationAttributes attr = AnnotatedElementUtils.getMergedAnnotationAttributes(
 					AnnotatedElementUtils.forAnnotations(annotationsToSearch), this.valueAnnotationType);
 			if (attr != null) {

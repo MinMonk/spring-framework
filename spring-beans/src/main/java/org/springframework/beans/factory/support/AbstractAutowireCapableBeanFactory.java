@@ -622,6 +622,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 * 	1. postProcessAfterInstantiation()
 			 * 	2. postProcessProperties()
 			 * 	3. postProcessPropertyValues()
+			 *
+			 * 	填充属性（byType + byName），自动注入Autowired是在这个方法中完成的
 			 */
 			populateBean(beanName, mbd, instanceWrapper);
 
@@ -1567,6 +1569,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
+	 * 找到当前类中以set开头并且方法入参数量一个以上的方法，当做是要注入的属性
 	 * Return an array of non-simple bean properties that are unsatisfied.
 	 * These are probably unsatisfied references to other beans in the
 	 * factory. Does not include simple properties like primitives or Strings.
