@@ -1264,7 +1264,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					BeanDefinition bd = (beanName != null && containsBean(beanName) ?
 							getMergedBeanDefinition(beanName) : null);
 					// 解析spring表达式，再解析占位符，"#"，可以写bena的名字
-					// 测试branch
+					// 测试branch1
 					value = evaluateBeanDefinitionString(strVal, bd);
 				}
 				// 扩展点：实现TypeConvert接口，重写其中的方法
