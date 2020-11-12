@@ -1249,13 +1249,21 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 
 			Class<?> type = descriptor.getDependencyType();
-			// 获取有@Value注解的字段属性和方法
+
+			/**
+			 * getAutowireCandidateResolver()返回的实现类是QualifierAnnotationAutowireCandidateResolver
+			 * 这个是在spring容器启动的时候，spring默认设置给AutowireCandidateResolver这个接口的实现类
+			 *
+			 * 而getSuggestedValue()是获取有@Value注解的字段属性和方法
+			 */
 			Object value = getAutowireCandidateResolver().getSuggestedValue(descriptor);
 			if (value != null) {
 				if (value instanceof String) {
+					// 解析spring表达式，先解析占位符，"$"，解析属性
 					String strVal = resolveEmbeddedValue((String) value);
 					BeanDefinition bd = (beanName != null && containsBean(beanName) ?
 							getMergedBeanDefinition(beanName) : null);
+					// 解析spring表达式，再解析占位符，"#"，可以写bena的名字
 					value = evaluateBeanDefinitionString(strVal, bd);
 				}
 				// 扩展点：实现TypeConvert接口，重写其中的方法

@@ -341,6 +341,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	}
 
 	/**
+	 * 获取加了@Value注解的字段or方法
 	 * Determine whether the given dependency declares a value annotation.
 	 * @see Value
 	 */
@@ -348,6 +349,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 	@Nullable
 	public Object getSuggestedValue(DependencyDescriptor descriptor) {
 		Object value = findValue(descriptor.getAnnotations());
+		// 先找字段，如果找不到加了@Value的字段属性，就再看有没有方法上加了@Value
 		if (value == null) {
 			MethodParameter methodParam = descriptor.getMethodParameter();
 			if (methodParam != null) {
