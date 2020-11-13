@@ -1280,11 +1280,17 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				}
 			}
 
+			/**
+			 * 下面是处理没有加@Value注解的情况
+			 */
+
+			// 处理特殊类型，Map、Array、Collection
 			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
 			if (multipleBeans != null) {
 				return multipleBeans;
 			}
 
+			// Autowired By type，根据类型去找bean，找出来的value有可能是实例化之后的bean，也有可能是实例化之前的class对象
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
 				if (isRequired(descriptor)) {
@@ -1296,9 +1302,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			String autowiredBeanName;
 			Object instanceCandidate;
 
+			// 判断根据type找到匹配的bean是否有多个
 			if (matchingBeans.size() > 1) {
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (autowiredBeanName == null) {
+					/**
+					 * 如果找到的对象为空，或者不是array、Map、Collection类型
+					 * 那么就抛出NoUniqueBeanDefinitionException异常
+					 * 反之返回null
+					 */
 					if (isRequired(descriptor) || !indicatesMultipleBeans(type)) {
 						return descriptor.resolveNotUnique(descriptor.getResolvableType(), matchingBeans);
 					}
@@ -1313,6 +1325,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else {
 				// We have exactly one match.
+				/**
+				 * 如果匹配的bean只有一个，就将当前bean的名称加到缓存autowiredBeanNames这个Set集合中，将value赋值给instanceCandidate
+				 */
 				Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
 				autowiredBeanName = entry.getKey();
 				instanceCandidate = entry.getValue();
@@ -1322,6 +1337,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				autowiredBeanNames.add(autowiredBeanName);
 			}
 			if (instanceCandidate instanceof Class) {
+				// 如果找到的value是class类型，就调用该方法，通过beanFactory.getBean()方法去实例化这个bean
 				instanceCandidate = descriptor.resolveCandidate(autowiredBeanName, type, this);
 			}
 			Object result = instanceCandidate;
@@ -1556,6 +1572,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
+	 * 从根据type匹配的集合中确定要注入的候选者对象
 	 * Determine the autowire candidate in the given set of beans.
 	 * <p>Looks for {@code @Primary} and {@code @Priority} (in that order).
 	 * @param candidates a Map of candidate names and candidate instances
@@ -1566,15 +1583,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Nullable
 	protected String determineAutowireCandidate(Map<String, Object> candidates, DependencyDescriptor descriptor) {
 		Class<?> requiredType = descriptor.getDependencyType();
+		// 先根据@Primary注解来确定待注入的候选bean，如果确定的候选者bean不为空就返回
 		String primaryCandidate = determinePrimaryCandidate(candidates, requiredType);
 		if (primaryCandidate != null) {
 			return primaryCandidate;
 		}
+
+		// 再根据加了@Priority这个优先级注解来确定待注入的候选bean，如果确定的候选者bean不为空就返回
+		// @Priority注解值的数字越小，优先级越高
 		String priorityCandidate = determineHighestPriorityCandidate(candidates, requiredType);
 		if (priorityCandidate != null) {
 			return priorityCandidate;
 		}
+
 		// Fallback
+		// 遍历根据type匹配到的集合，根据属性名来确定待注入的候选bean，存在名称一致的就返回，不存在就返回null
+		// 也就是@Autowired的注入逻辑，先byType，再byName
 		for (Map.Entry<String, Object> entry : candidates.entrySet()) {
 			String candidateName = entry.getKey();
 			Object beanInstance = entry.getValue();
