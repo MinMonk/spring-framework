@@ -4,6 +4,7 @@ import com.monk.study.bean.User;
 import com.monk.study.config.AppConfig;
 import com.monk.study.service.HelloService;
 import com.monk.study.service.TestFactoryBean;
+import com.monk.study.service.UserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -20,8 +21,8 @@ public class App {
 
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
-		ctx.getBean("");
-
+		UserService userService = ctx.getBean("userService", UserService.class);
+		userService.test();
 	}
 }
 

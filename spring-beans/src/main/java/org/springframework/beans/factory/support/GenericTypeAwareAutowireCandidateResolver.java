@@ -66,6 +66,11 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 			// If explicitly false, do not proceed with any other checks...
 			return false;
 		}
+		/**
+		 * 先执行父类的判断，确定自动注入候选者这个属性为true的前提下，
+		 * 再执行当前自身的checkGenericTypeMatch()方法去判断去确定泛型的原始类型和当前
+		 * 需要注入的类型是否匹配
+		 */
 		return checkGenericTypeMatch(bdHolder, descriptor);
 	}
 

@@ -37,6 +37,12 @@ public class SimpleAutowireCandidateResolver implements AutowireCandidateResolve
 	public static final SimpleAutowireCandidateResolver INSTANCE = new SimpleAutowireCandidateResolver();
 
 
+	/**
+	 * 判断当前bean是不是一个自动注入的候选者
+	 * @param bdHolder the bean definition including bean name and aliases
+	 * @param descriptor the descriptor for the target method parameter or field
+	 * @return
+	 */
 	@Override
 	public boolean isAutowireCandidate(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		return bdHolder.getBeanDefinition().isAutowireCandidate();

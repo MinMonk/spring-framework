@@ -1264,7 +1264,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					BeanDefinition bd = (beanName != null && containsBean(beanName) ?
 							getMergedBeanDefinition(beanName) : null);
 					// 解析spring表达式，再解析占位符，"#"，可以写bena的名字
-					// 测试branch1
 					value = evaluateBeanDefinitionString(strVal, bd);
 				}
 				// 扩展点：实现TypeConvert接口，重写其中的方法
@@ -1304,6 +1303,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 			// 判断根据type找到匹配的bean是否有多个
 			if (matchingBeans.size() > 1) {
+				/**
+				 * 从匹配的bean中按照顺序确定最重要注入的bean
+				 * 顺序：@Primary  >>>   @Priority  >>>  根据beanName确定唯一的bean
+				 */
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 				if (autowiredBeanName == null) {
 					/**
@@ -1489,6 +1492,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	/**
+	 *
+	 * 筛选待自动注入候选者
 	 * Find bean instances that match the required type.
 	 * Called during autowiring for the specified bean.
 	 * @param beanName the name of the bean that is about to be wired
@@ -1504,6 +1509,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	protected Map<String, Object> findAutowireCandidates(
 			@Nullable String beanName, Class<?> requiredType, DependencyDescriptor descriptor) {
 
+		// 根据待注入的类型找到该类型全部的类名称
 		String[] candidateNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 				this, requiredType, true, descriptor.isEager());
 		Map<String, Object> result = new LinkedHashMap<>(candidateNames.length);
@@ -1520,6 +1526,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		for (String candidate : candidateNames) {
 			if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, descriptor)) {
+				// 根据byType找出来的类名称去判断是不是自动注入的候选者，是候选者的就加到result这个Map中
 				addCandidateEntry(result, candidate, descriptor, requiredType);
 			}
 		}
