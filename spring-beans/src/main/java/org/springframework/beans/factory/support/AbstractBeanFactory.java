@@ -403,6 +403,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		}
 
 		// Check if required type matches the type of the actual bean instance.
+		// 对找到的bean进行类型判断,是不是要注入的类型,如果类型不匹配就再判断是否存在
+		// 类型转换器,不存在转换器就抛出BeanNotOfRequiredTypeException异常,转换报错也就抛出异常
 		if (requiredType != null && !requiredType.isInstance(bean)) {
 			try {
 				T convertedBean = getTypeConverter().convertIfNecessary(bean, requiredType);

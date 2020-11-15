@@ -313,6 +313,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 
 	@Override
 	public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) {
+		// 寻找加了@Resource注解的注入点(属性and方法)
 		InjectionMetadata metadata = findResourceMetadata(beanName, bean.getClass(), pvs);
 		try {
 			metadata.inject(bean, beanName, pvs);
@@ -516,14 +517,17 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		if (factory instanceof AutowireCapableBeanFactory) {
 			AutowireCapableBeanFactory beanFactory = (AutowireCapableBeanFactory) factory;
 			DependencyDescriptor descriptor = element.getDependencyDescriptor();
+			// isDefaultName和element.name这两个属性是在ResourceElement这个类的构造方法中赋值的
 			if (this.fallbackToDefaultTypeMatch && element.isDefaultName && !factory.containsBean(name)) {
 				autowiredBeanNames = new LinkedHashSet<>();
+				// 如果@Resource中没有指定name,那么spring就会用注入点的名称做为beanName,走@Autowired的逻辑去寻找要注入的bean
 				resource = beanFactory.resolveDependency(descriptor, requestingBeanName, autowiredBeanNames, null);
 				if (resource == null) {
 					throw new NoSuchBeanDefinitionException(element.getLookupType(), "No resolvable resource object");
 				}
 			}
 			else {
+				// 如果@Resource指定了name属性,那么spring就直接根据指定的name属性去寻找bean
 				resource = beanFactory.resolveBeanByName(name, descriptor);
 				autowiredBeanNames = Collections.singleton(name);
 			}
@@ -619,6 +623,11 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			Resource resource = ae.getAnnotation(Resource.class);
 			String resourceName = resource.name();
 			Class<?> resourceType = resource.type();
+			/**
+			 * @Resource注解中没有指定name属性
+			 * 如果注入点是字段属性,那么就取字段属性的名字作为beanName
+			 * 如果注入点是方法(必须是set开头的方法),那就就截取掉set方法的前三位的名字再转为驼峰结构作为beanName
+			 */
 			this.isDefaultName = !StringUtils.hasLength(resourceName);
 			if (this.isDefaultName) {
 				resourceName = this.member.getName();

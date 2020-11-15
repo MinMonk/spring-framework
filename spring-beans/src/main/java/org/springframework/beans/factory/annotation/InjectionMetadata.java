@@ -123,6 +123,7 @@ public class InjectionMetadata {
 		Collection<InjectedElement> elementsToIterate =
 				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
+			// 遍历全部的注入点,依次对为注入点进行赋值
 			for (InjectedElement element : elementsToIterate) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Processing injected element of bean '" + beanName + "': " + element);
@@ -130,8 +131,10 @@ public class InjectionMetadata {
 				/**
 				 * 注意这里的inject方法，InjectedElement类他还有两个子类AutowiredFieldElement 和 AutowiredMethodElement
 				 * 这两个子类分别重写了父类的inject方法
+				 *
+				 * @Autowired注解会使用AutowiredFieldElement 和 AutowiredMethodElement中的inject方法
+				 * @Resouce注解则直接使用父类InjectedElement类中的inject方法
 				 */
-
 				element.inject(target, beanName, pvs);
 			}
 		}
@@ -241,6 +244,7 @@ public class InjectionMetadata {
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
+				// 通过反射将getResourceToInject()方法找到的bean对象赋值给加了@Resource的属性
 				field.set(target, getResourceToInject(target, requestingBeanName));
 			}
 			else {
@@ -250,6 +254,7 @@ public class InjectionMetadata {
 				try {
 					Method method = (Method) this.member;
 					ReflectionUtils.makeAccessible(method);
+					// 通过反射将getResourceToInject()方法找到的bean对象赋值给加了@Resource的方法
 					method.invoke(target, getResourceToInject(target, requestingBeanName));
 				}
 				catch (InvocationTargetException ex) {

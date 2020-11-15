@@ -68,8 +68,9 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 		}
 		/**
 		 * 先执行父类的判断，确定自动注入候选者这个属性为true的前提下，
-		 * 再执行当前自身的checkGenericTypeMatch()方法去判断去确定泛型的原始类型和当前
-		 * 需要注入的类型是否匹配
+		 * 再执行当前自身的checkGenericTypeMatch()方法去筛选
+		 *
+		 * 当前类的筛选规则主要是针对自动注入的类型为泛型的情况
 		 */
 		return checkGenericTypeMatch(bdHolder, descriptor);
 	}
@@ -77,11 +78,16 @@ public class GenericTypeAwareAutowireCandidateResolver extends SimpleAutowireCan
 	/**
 	 * Match the given dependency type with its generic type information against the given
 	 * candidate bean definition.
+	 *
+	 * 当前方法主要是针对泛型的校验，因为任何类型的都会通过上一步的筛选(byType找到的全部候选者)，而这个方法就是确定
+	 * 要注入的类型是不是泛型的目标类型，如果不是要注入的目标类型，就没有必要进行后面的逻辑了
 	 */
 	protected boolean checkGenericTypeMatch(BeanDefinitionHolder bdHolder, DependencyDescriptor descriptor) {
 		ResolvableType dependencyType = descriptor.getResolvableType();
 		if (dependencyType.getType() instanceof Class) {
 			// No generic type -> we know it's a Class type-match, so no need to check again.
+			// 由于当前类的筛选规则主要是针对泛型的，所以当明确当前要筛选的类的类型为Class，就没必要进行类的类型判断
+			// 因为能走到这个方法的类，肯定是要注入的类的类型，而类又是class类型，就没必要判断了
 			return true;
 		}
 

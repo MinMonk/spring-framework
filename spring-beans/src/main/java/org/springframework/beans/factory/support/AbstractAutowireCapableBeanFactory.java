@@ -536,7 +536,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			/**
 			 *  spring默认的创建bean方法
 			 *  如果用户没有自定义PostProcessor或者用户自定了PostProcessor但是返回null，那么spring还是会继续
-			 *  使用自己的创建Bean方法来创建Bean
+			 *  使用自己的创建Bean方法来创建Bean，而doCreateBean()方法就是spring自己默认的创建bean的方法
 			 */
 			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 			if (logger.isTraceEnabled()) {
@@ -556,6 +556,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
+	 * spring自己的创建bean方法
 	 * Actually create the specified bean. Pre-creation processing has already happened
 	 * at this point, e.g. checking {@code postProcessBeforeInstantiation} callbacks.
 	 * <p>Differentiates between default bean instantiation, use of a
@@ -1433,6 +1434,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		PropertyValues pvs = (mbd.hasPropertyValues() ? mbd.getPropertyValues() : null);
 
+		// 一般情况下,该属性为NO,不论是xml还是注解,默认的都是AutowireCapableBeanFactory.AUTOWIRE_NO,所以不会走下面这段逻辑
 		int resolvedAutowireMode = mbd.getResolvedAutowireMode();
 		if (resolvedAutowireMode == AUTOWIRE_BY_NAME || resolvedAutowireMode == AUTOWIRE_BY_TYPE) {
 			MutablePropertyValues newPvs = new MutablePropertyValues(pvs);
@@ -1458,6 +1460,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof InstantiationAwareBeanPostProcessor) {
 					InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+
+					/**
+					 * 自动注入的逻辑实现
+					 * @Autowired的注入逻辑在AutowiredAnnotationBeanPostProcessor实现类中
+					 * @Resource的注入逻辑在CommonAnnotationBeanPostProcessor实现类中
+					 */
 					PropertyValues pvsToUse = ibp.postProcessProperties(pvs, bw.getWrappedInstance(), beanName);
 					if (pvsToUse == null) {
 						if (filteredPds == null) {
@@ -1569,7 +1577,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 
 	/**
-	 * 找到当前类中以set开头并且方法入参数量一个以上的方法，当做是要注入的属性
+	 * 找到当前类中以set开头并且方法入参数量一个以上的方法，当做是要注入的注入点
 	 * Return an array of non-simple bean properties that are unsatisfied.
 	 * These are probably unsatisfied references to other beans in the
 	 * factory. Does not include simple properties like primitives or Strings.

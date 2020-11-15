@@ -1217,6 +1217,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			@Nullable Set<String> autowiredBeanNames, @Nullable TypeConverter typeConverter) throws BeansException {
 
 		descriptor.initParameterNameDiscovery(getParameterNameDiscoverer());
+		/**
+		 * Option类型:
+		 * 	一种特殊的类型,spring也支持这种类型的自动注入
+		 *
+		 * Eg:
+		 * @Autowired
+		 * private Option<UserService> userSerice;
+		 *
+		 */
 		if (Optional.class == descriptor.getDependencyType()) {
 			return createOptionalDependency(descriptor, requestingBeanName);
 		}
@@ -1228,9 +1237,20 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return new Jsr330Factory().createDependencyProvider(descriptor, requestingBeanName);
 		}
 		else {
+			/**
+			 * 在自动注入的时候,对象也可以使用@Lazy注解,下面这行代码是针对加了lazy注解的处理逻辑
+			 * 如果加了lazy注解,那么这里注入的是一个代理对象
+			 *
+			 * !!!注意!!!
+			 * 属性or方法上加的lazy注解和在类上加的lazy注解是有区别的
+			 * 类上的lazy注解表示的是这个类是是个懒加载的bean
+			 * 属性or方法上的lazy注解,一种应用场景就是解决循环依赖
+			 *
+			 */
 			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(
 					descriptor, requestingBeanName);
 			if (result == null) {
+				// 如果没有加lazy注解,或者针对lazy注解的处理方式,找到的对象为null,那么spring就再根据descriptor寻找合适的bean对象
 				result = doResolveDependency(descriptor, requestingBeanName, autowiredBeanNames, typeConverter);
 			}
 			return result;
@@ -1283,7 +1303,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			 * 下面是处理没有加@Value注解的情况
 			 */
 
-			// 处理特殊类型，Map、Array、Collection
+			// 处理特殊类型，如果是Map、Array、Collection,查找到的结果不为null,就可以直接返回出去,不用继续执行后面的逻辑了
 			Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
 			if (multipleBeans != null) {
 				return multipleBeans;
@@ -1292,6 +1312,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// Autowired By type，根据类型去找bean，找出来的value有可能是实例化之后的bean，也有可能是实例化之前的class对象
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
 			if (matchingBeans.isEmpty()) {
+				// 判断require是否为true，如果为true而匹配到matchingBeans集合为空，那么就抛出NoSuchBeanDefinitionException异常
 				if (isRequired(descriptor)) {
 					raiseNoMatchingBeanFound(type, descriptor.getResolvableType(), descriptor);
 				}
@@ -1304,7 +1325,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			// 判断根据type找到匹配的bean是否有多个
 			if (matchingBeans.size() > 1) {
 				/**
-				 * 从匹配的bean中按照顺序确定最重要注入的bean
+				 * 从匹配的bean中按照顺序确定最终符合条件要注入的bean
 				 * 顺序：@Primary  >>>   @Priority  >>>  根据beanName确定唯一的bean
 				 */
 				autowiredBeanName = determineAutowireCandidate(matchingBeans, descriptor);
@@ -1493,7 +1514,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	/**
 	 *
-	 * 筛选待自动注入候选者
+	 * 筛选待自动注入的bean候选者
 	 * Find bean instances that match the required type.
 	 * Called during autowiring for the specified bean.
 	 * @param beanName the name of the bean that is about to be wired
@@ -1525,11 +1546,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		for (String candidate : candidateNames) {
+			// isSelfReference()方法的作用是,判断要注入的是不是自己本身
+			// isAutowireCandidate()方法的作用是筛选出符合条件的候选者
 			if (!isSelfReference(beanName, candidate) && isAutowireCandidate(candidate, descriptor)) {
-				// 根据byType找出来的类名称去判断是不是自动注入的候选者，是候选者的就加到result这个Map中
+				// 根据byType找出来的类名称去判断是不是自动注入的候选者，对于符合条件的候选者的就加到result这个Map中
 				addCandidateEntry(result, candidate, descriptor, requiredType);
 			}
 		}
+
+		// 对经过筛选后的结果进行判断,如果为空,并且在上一步是把自己给筛选掉了,那么在这里就把自己再添加到result中去
 		if (result.isEmpty()) {
 			boolean multiple = indicatesMultipleBeans(requiredType);
 			// Consider fallback matches if the first pass failed to find anything...
