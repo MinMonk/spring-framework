@@ -1,8 +1,11 @@
 package com.monk.study.service;
 
 import com.monk.study.bean.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PreDestroy;
 
 /**
  * @ClassName HelloService
@@ -23,5 +26,10 @@ public class HelloService {
 
 	public void sayHello1(){
 		System.out.println("hello " + user.getUserName());
+	}
+
+	@PreDestroy
+	public void destory(){
+		System.out.println(" helloService destory");
 	}
 }

@@ -22,7 +22,9 @@ public class App {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
 		UserService userService = ctx.getBean("userService", UserService.class);
-		userService.test();
+		//userService.test();
+
+		ctx.close();
 	}
 }
 

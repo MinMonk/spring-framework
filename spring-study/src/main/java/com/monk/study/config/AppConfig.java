@@ -30,18 +30,18 @@ import java.util.Map;
 @ComponentScan("com.monk.study")
 public class AppConfig {
 
-	@Bean
+	/*@Bean
 	public MessageSource messageSource(){
 		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
 		messageSource.setBasename("message");
 		return messageSource;
-	}
+	}*/
 
 	/**
 	 * 注册一个事件监听器
 	 * @return
 	 */
-	@Bean
+	/*@Bean
 	public ApplicationListener applicationListener(){
 		return new ApplicationListener() {
 			@Override
@@ -49,7 +49,7 @@ public class AppConfig {
 				System.out.println("收到了一个事件，event:" + event.toString());
 			}
 		};
-	}
+	}*/
 
 	@Bean
 	public CustomEditorConfigurer customEditorConfigurer(){
@@ -60,11 +60,11 @@ public class AppConfig {
 		return customEditorConfigurer;
 	}
 
-	@Bean
+	/*@Bean
 	public ConversionServiceFactoryBean conversionServiceFactoryBean(){
 		ConversionServiceFactoryBean conversionServiceFactoryBean = new ConversionServiceFactoryBean();
 		conversionServiceFactoryBean.setConverters(Collections.singleton(new StringToUserConvertService()));
 
 		return conversionServiceFactoryBean;
-	}
+	}*/
 }

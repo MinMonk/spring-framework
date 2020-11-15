@@ -553,17 +553,28 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	public void destroySingleton(String beanName) {
 		// Remove a registered singleton of the given name, if any.
+		// 根据beanName从单例缓存池中移除beanName对应的对象
 		removeSingleton(beanName);
 
 		// Destroy the corresponding DisposableBean instance.
 		DisposableBean disposableBean;
 		synchronized (this.disposableBeans) {
+			//
+			//
+			/**
+			 * 将当前将要销毁的bean从disposableBeans这个LinkHashMap中移除
+			 *
+			 * 这里的disposableBeans是个linkHashMap,是在初始化完bean之后填充的值
+			 * 参见org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean()方法中最后的一个try-catch逻辑
+			 */
 			disposableBean = (DisposableBean) this.disposableBeans.remove(beanName);
 		}
+
 		destroyBean(beanName, disposableBean);
 	}
 
 	/**
+	 * 销毁benn
 	 * Destroy the given bean. Must destroy beans that depend on the given
 	 * bean before the bean itself. Should not throw any exceptions.
 	 * @param beanName the name of the bean
