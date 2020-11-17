@@ -133,6 +133,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 			this.destroyMethod = destroyMethod;
 		}
+		//过滤后置处理器，只保留有销毁方法的后置处理器
 		this.beanPostProcessors = filterPostProcessors(postProcessors, bean);
 	}
 
@@ -184,17 +185,22 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 */
 	@Nullable
 	private String inferDestroyMethodIfNecessary(Object bean, RootBeanDefinition beanDefinition) {
+		// 如果在beandefinition中指定了destoryMethodName方法，那么就直接返回destoryMethodName
 		String destroyMethodName = beanDefinition.getDestroyMethodName();
+
+		// 如果destoryMethodName方法是默认的(inferred)，或者destoryMethodName为空，并且否实现了AutoCloseable接口
 		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
 				(destroyMethodName == null && bean instanceof AutoCloseable)) {
 			// Only perform destroy method inference or Closeable detection
 			// in case of the bean not explicitly implementing DisposableBean
+			// 如果当前bean没有实现DisposableBean接口，那么就返回close方法
 			if (!(bean instanceof DisposableBean)) {
 				try {
 					return bean.getClass().getMethod(CLOSE_METHOD_NAME).getName();
 				}
 				catch (NoSuchMethodException ex) {
 					try {
+						// 如果close方法不存在，那么就返回shutdown方法
 						return bean.getClass().getMethod(SHUTDOWN_METHOD_NAME).getName();
 					}
 					catch (NoSuchMethodException ex2) {
@@ -239,6 +245,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	public void destroy() {
 		if (!CollectionUtils.isEmpty(this.beanPostProcessors)) {
 			for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
+				// 执行加了@PreDestory的方法
 				processor.postProcessBeforeDestruction(this.bean, this.beanName);
 			}
 		}
@@ -255,6 +262,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					}, this.acc);
 				}
 				else {
+					// 这里实际执行的是用户实现了DisposableBean。重写的destroy()方法逻辑
 					((DisposableBean) this.bean).destroy();
 				}
 			}

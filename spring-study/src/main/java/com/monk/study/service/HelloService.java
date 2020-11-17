@@ -1,6 +1,7 @@
 package com.monk.study.service;
 
 import com.monk.study.bean.User;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import javax.annotation.PreDestroy;
  * @Version V1.0
  **/
 @Service("helloService")
-public class HelloService {
+public class HelloService implements DisposableBean {
 
 	@Value("zhangsan")
 	private User user;
@@ -30,6 +31,11 @@ public class HelloService {
 
 	@PreDestroy
 	public void destory(){
-		System.out.println(" helloService destory");
+		System.out.println(" PreDestroy destory");
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		System.out.println(" DisposableBean destory");
 	}
 }

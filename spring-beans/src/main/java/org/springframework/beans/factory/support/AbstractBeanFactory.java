@@ -1914,7 +1914,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		 * 	1. 不是原型的bean
 		 * 	2. 实现了DisposableBean接口或者AutoCloseable接口
 		 * 	3. 在满足BeanDefinition.destroyMethodName=(inferred)的前提下,类中含有close名称的方法或者shutdown名称的方法
-		 * 	4. 还没看明白,待补充
+		 * 	4. 加了@PreDestroy注解的方法
 		 */
 		if (!mbd.isPrototype() && requiresDestruction(bean, mbd)) {
 			if (mbd.isSingleton()) {
@@ -1922,6 +1922,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				// work for the given bean: DestructionAwareBeanPostProcessors,
 				// DisposableBean interface, custom destroy method.
 				// 将满足条件的bean注册为DisposableBean,并添加到disposableBeans这个缓存LinkedHashMap中
+				// 在DisposableBeanAdapter这个类的构造方法中，做了一系列的事情
 				registerDisposableBean(beanName,
 						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors(), acc));
 			}
