@@ -63,7 +63,24 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		/**
+		 * 往spring容器中注入一些默认的类
+		 * 	1. AnnotationAwareOrderComparator
+		 *  2. ContextAnnotationAutowireCandidateResolver
+		 *  3. ConfigurationClassPostProcessor
+		 *  4. AutowiredAnnotationBeanPostProcessor
+		 *  5. jsr250Present - CommonAnnotationBeanPostProcessor   只有在支持jsr250Present的时候,才会注入这个类(存在@Resource注解)
+		 *  6. jpaPresent - PersistenceAnnotationBeanPostProcessor 只有在支持jpaPresent的时候,才会注入这个类(存在javax.persistence.EntityManagerFactory这个类)
+		 *  7. EventListenerMethodProcessor
+		 *  8. DefaultEventListenerFactory
+		 */
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+
+		/**
+		 * 1. 添加spring启动过程中需要解析的注解
+		 * 2. 设置环境变量
+		 * 3. set一个什么resource,暂时还不清楚是干嘛用的
+		 */
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -84,8 +101,21 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		/**
+		 * 1. 执行this()这个无参构造方法之前,会先执行父类GenericApplicationContext的无参构造方法
+		 * 而父类的无参构造方法中,就给beanFactory赋值了,new了一个DefaultListableBeanFactory()
+		 *
+		 * 2. this()方法就是执行自己的无参构造方法,直接可以看到在自身的无参构造中,分别new了两个对象.
+		 * 	!!!注意!!!   这里不要以为真的知识仅仅new了两个对象,仔细看着两个对象的构造方法,其中可做了不少事情
+		 * 		1. AnnotatedBeanDefinitionReader:这个从字面意思看,就是new了一个BeanDefinition的阅读器
+		 * 		2. ClassPathBeanDefinitionScanner:而这个就是new了一个BeanDefinition的扫描器
+		 */
 		this();
+
+		// 将入参的这个配置类注册到spring中
 		register(componentClasses);
+
+
 		refresh();
 	}
 

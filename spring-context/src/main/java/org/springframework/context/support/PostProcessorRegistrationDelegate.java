@@ -186,6 +186,14 @@ final class PostProcessorRegistrationDelegate {
 		beanFactory.clearMetadataCache();
 	}
 
+	/**
+	 * 将扫描出的BeanPostProcessor注册到spring容器中,并排序</br>
+	 * 实现了PriorityOrdered接口的在前,实现了Ordered接口的其次,实现了MergedBeanDefinitionPostProcessor这个接口的在最后</br>
+	 * 如果一个类同时实现了PriorityOrdered & MergedBeanDefinitionPostProcessor,那么在最后一步的排序过程中,会先删除根据</br>
+	 * PriorityOrdered排序时添加的BeanPostProcessor,重新添加一次当前类,将当前类添加到BeanPostProcessor这个集合的最后</br>
+	 * @param beanFactory
+	 * @param applicationContext
+	 */
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 
@@ -293,7 +301,9 @@ final class PostProcessorRegistrationDelegate {
 	}
 
 	/**
+	 * 向BeanFactory中添加BeanPostProcessor
 	 * Register the given BeanPostProcessor beans.
+	 *
 	 */
 	private static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanPostProcessor> postProcessors) {

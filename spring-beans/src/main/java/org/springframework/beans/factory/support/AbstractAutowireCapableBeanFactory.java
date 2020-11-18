@@ -1638,6 +1638,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
+	 * 判断PropertyDescriptor是否需要进行自动装配,如果是set方法,并且是ignoredDependencyInterfaces这个集合中的接口
+	 * 就返回true,返回true就不用进行自动装配
 	 * Determine whether the given bean property is excluded from dependency checks.
 	 * <p>This implementation excludes properties defined by CGLIB and
 	 * properties whose type matches an ignored dependency type or which

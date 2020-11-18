@@ -945,6 +945,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		return result;
 	}
 
+	/**
+	 * 添加bean后置处理器,如果当前将要添加的BeanPostProcessor已存在,就先删除已存在的,将当前将要添加的BeanPostProcessor添加到最后
+	 * @param beanPostProcessor the post-processor to register
+	 */
 	@Override
 	public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
 		Assert.notNull(beanPostProcessor, "BeanPostProcessor must not be null");

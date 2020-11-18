@@ -7,6 +7,7 @@ import com.monk.study.service.TestFactoryBean;
 import com.monk.study.service.UserService;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.env.Environment;
 
 import java.util.Locale;
 
@@ -22,9 +23,9 @@ public class App {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
 		UserService userService = ctx.getBean("userService", UserService.class);
-		//userService.test();
 
 		ctx.close();
+
 	}
 }
 

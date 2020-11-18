@@ -192,6 +192,9 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
+	 * 注册spring在启动过程中,需要解析的注解,这个方法的第一行就默认添加了@Component注解,
+	 * 同时也将加了@Component注解的相关注解都加入到这个includeFilters中,
+	 * 比方说有常见的@Repository,@Controller,@Service
 	 * Register the default filter for {@link Component @Component}.
 	 * <p>This will implicitly register all annotations that have the
 	 * {@link Component @Component} meta-annotation including the

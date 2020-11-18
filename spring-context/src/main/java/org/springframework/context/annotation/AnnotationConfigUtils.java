@@ -138,6 +138,16 @@ public abstract class AnnotationConfigUtils {
 	}
 
 	/**
+	 * 往spring容器中注入一些默认的类
+	 * 	1. AnnotationAwareOrderComparator
+	 *  2. ContextAnnotationAutowireCandidateResolver
+	 *  3. ConfigurationClassPostProcessor
+	 *  4. AutowiredAnnotationBeanPostProcessor
+	 *  5. jsr250Present - CommonAnnotationBeanPostProcessor   只有在支持jsr250Present的时候,才会注入这个类(存在@Resource注解)
+	 *  6. jpaPresent - PersistenceAnnotationBeanPostProcessor 只有在支持jpaPresent的时候,才会注入这个类(存在javax.persistence.EntityManagerFactory这个类)
+	 *  7. EventListenerMethodProcessor
+	 *  8. DefaultEventListenerFactory
+	 *
 	 * Register all relevant annotation post processors in the given registry.
 	 * @param registry the registry to operate on
 	 * @param source the configuration source element (already extracted)
@@ -150,10 +160,12 @@ public abstract class AnnotationConfigUtils {
 
 		DefaultListableBeanFactory beanFactory = unwrapDefaultListableBeanFactory(registry);
 		if (beanFactory != null) {
+			// 设置一个默认的自动注入顺序比较器
 			if (!(beanFactory.getDependencyComparator() instanceof AnnotationAwareOrderComparator)) {
 				beanFactory.setDependencyComparator(AnnotationAwareOrderComparator.INSTANCE);
 			}
 			if (!(beanFactory.getAutowireCandidateResolver() instanceof ContextAnnotationAutowireCandidateResolver)) {
+				// 设置一个自动注入候选者筛选的解析器
 				beanFactory.setAutowireCandidateResolver(new ContextAnnotationAutowireCandidateResolver());
 			}
 		}
