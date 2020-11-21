@@ -529,13 +529,26 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			try {
 				// Allows post-processing of the bean factory in context subclasses.
+				// 空方法,提供给子类去扩展
 				postProcessBeanFactory(beanFactory);
 
 				// Invoke factory processors registered as beans in the context.
 				/**
 				 * 执行当前容器中全部的BeanFactoryPostProcessor </br>
 				 * !!!注意!!!</br>
-				 * 这里执行的是BeanFactory的后置处理器,是bean工厂的后置处理器,不是bena的后置处理器</br>
+				 * 这里执行的是BeanFactory的后置处理器,是bean工厂的后置处理器,不是bean的后置处理器</br></br>
+				 *
+				 * bean的扫描,配置类的解析也是在这个方法中执行的,但是要注意的是,并不是显示的调用,而是依次执行当前spring容器
+				 * 中的后置处理器.执行顺序为:实现了PriorityOrder  >>>   Order   >>>   普通实现了BeanFactoryPostProcessor
+				 * </br></br>
+				 * BeanFactoryPostProcessor还有一个子类BeanDefinitionRegistryPostProcessor,那么实现了BeanDefinitionRegistryPostProcessor这个接口的类,
+				 * 自然也是一个BeanFactoryPostProcessor,只不过在这里执行的时候,会执行子类的postProcessBeanDefinitionRegistry方法去注册BeanDefinition,
+				 * 在执行完全部的postProcessBeanDefinitionRegistry方法后,再去执行父类的postProcessBeanFactory方法去初始化BeanFactory
+				 * </br></br>
+				 * 这里这么执行的原因,其实也很好理解,就是BeanFactory是根据BeanDefinition来生成Bean的,那么我BeanFactory初始化完了,bean都生成好了,
+				 * 你再往BeanFa注册(添加)Bean那我是不是又要重头来过,再去生成一次Bean.  Bean都生成后之后,我提供给你扩展点,让我们实现BeanFactoryPostProcessor
+				 * 来修改BeanFactory生成好的Bean,做一些自定义的修改就可以了,就不要让BeanFactory再从头再来一次再生成一次Bean了.
+				 * 也可以理解为,在我BeanFactory初始化好后,你就不要再给我添加原材料(BeanDefinition)了,我不支持这种操作
 				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 

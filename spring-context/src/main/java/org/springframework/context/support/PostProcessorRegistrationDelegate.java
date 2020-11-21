@@ -53,6 +53,12 @@ final class PostProcessorRegistrationDelegate {
 	}
 
 
+	/**
+	 * 按照下列顺序依次执行
+	 * 	1. org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry()
+	 * @param beanFactory
+	 * @param beanFactoryPostProcessors
+	 */
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 

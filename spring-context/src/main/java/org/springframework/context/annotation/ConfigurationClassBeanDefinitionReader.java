@@ -122,6 +122,7 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
+	 * 加载解析配置类
 	 * Read a particular {@link ConfigurationClass}, registering bean definitions
 	 * for the class itself and all of its {@link Bean} methods.
 	 */
@@ -137,18 +138,25 @@ class ConfigurationClassBeanDefinitionReader {
 			return;
 		}
 
+		// 解析并生成通过@Import这种方式导入的配置类BeanDefinition,并将bd注册到spring容器中,生成的bd类型为AnnotatedGenericBeanDefinition
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
+
+		// 解析并生成@Bean注解这种配置类的BeanDefinition,并将bd注册到spring容器中,生成的bd类型为ConfigurationClassBeanDefinition
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
 
+		// 解析并生成@ImportResource注解这种配置类的BeanDefinition,并将bd注册到spring容器中
 		loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+
+		// 解析并生成通过@Import注解导入实现了ImportBeanDefinitionRegistrar接口的配置类的BeanDefinition,并将bd注册到spring容器中
 		loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
 	}
 
 	/**
+	 * 解析普通的配置类,并将bd注册到spring容器中,bd类型为AnnotatedGenericBeanDefinition
 	 * Register the {@link Configuration} class itself as a bean definition.
 	 */
 	private void registerBeanDefinitionForImportedConfigurationClass(ConfigurationClass configClass) {
@@ -171,6 +179,7 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
+	 * 解析注册加了@Bean注解的方法,生成BeanDefinition并注册到BeanFactory中
 	 * Read the given {@link BeanMethod}, registering bean definitions
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
@@ -193,6 +202,10 @@ class ConfigurationClassBeanDefinitionReader {
 		Assert.state(bean != null, "No @Bean annotation attributes");
 
 		// Consider name and any aliases
+		/**
+		 * Eg: @Bean(name = {"name1","name2","name3"}) <br/>
+		 * spring在生成beanName的时候,会将name1作为beanName,name2之后的name作为别名(aliasName)
+		 */
 		List<String> names = new ArrayList<>(Arrays.asList(bean.getStringArray("name")));
 		String beanName = (!names.isEmpty() ? names.remove(0) : methodName);
 
@@ -337,6 +350,11 @@ class ConfigurationClassBeanDefinitionReader {
 		return true;
 	}
 
+	/**
+	 * 解析并生成@ImportResource注解这种配置类的BeanDefinition,并将bd注册到spring容器中<br/>
+	 * 支持groovy 和 xml两张配置文件
+	 * @param importedResources
+	 */
 	private void loadBeanDefinitionsFromImportedResources(
 			Map<String, Class<? extends BeanDefinitionReader>> importedResources) {
 
@@ -379,6 +397,12 @@ class ConfigurationClassBeanDefinitionReader {
 		});
 	}
 
+	/**
+	 * 解析并生成通过@Import注解导入实现了ImportBeanDefinitionRegistrar接口的配置类的BeanDefinition,并将bd注册到spring容器中<br/>
+	 * 和其他的处理方式不同,这里只是直接盗用用户实现了ImportBeanDefinitionRegistrar接口,重写了其中registerBeanDefinitions方法的逻辑
+	 * 也就是执行用户自定义的方法逻辑
+	 * @param registrars
+	 */
 	private void loadBeanDefinitionsFromRegistrars(Map<ImportBeanDefinitionRegistrar, AnnotationMetadata> registrars) {
 		registrars.forEach((registrar, metadata) ->
 				registrar.registerBeanDefinitions(metadata, this.registry, this.importBeanNameGenerator));

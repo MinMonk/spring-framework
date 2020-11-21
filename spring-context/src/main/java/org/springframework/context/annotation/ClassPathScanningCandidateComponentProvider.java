@@ -483,6 +483,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
+	 * 判断当前类是否应该被排除or应该被包含(应该被spring解析)
 	 * Determine whether the given class does not match any exclude filter
 	 * and does match at least one include filter.
 	 * @param metadataReader the ASM ClassReader for the class
@@ -517,6 +518,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	}
 
 	/**
+	 *
+	 * 判断当前类是不是独立的一个类(不被其他类依赖),并且不是一个接口or抽象类,如果是抽象类,那么当前类中是否存在Lookup注解的方法
 	 * Determine whether the given bean definition qualifies as candidate.
 	 * <p>The default implementation checks whether the class is not an interface
 	 * and not dependent on an enclosing class.

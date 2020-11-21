@@ -2,10 +2,14 @@ package com.monk.study;
 
 import com.monk.study.bean.User;
 import com.monk.study.config.AppConfig;
+import com.monk.study.service.CustomBeanNameGenerator;
 import com.monk.study.service.HelloService;
 import com.monk.study.service.TestFactoryBean;
 import com.monk.study.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigUtils;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.Environment;
 
@@ -21,10 +25,15 @@ import java.util.Locale;
 public class App {
 
 	public static void main(String[] args) {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
-		UserService userService = ctx.getBean("userService", UserService.class);
+		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+		applicationContext.register(AppConfig.class);
 
-		ctx.close();
+		// 自定义BeanName生成器
+		applicationContext.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,new CustomBeanNameGenerator());
+		applicationContext.refresh();
+		UserService userService = applicationContext.getBean("userService", UserService.class);
+
+		applicationContext.close();
 
 	}
 }

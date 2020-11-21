@@ -218,6 +218,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 
 	/**
+	 * 从配置类中注册BeanDefinition到BeanFactory中
 	 * Derive further bean definitions from the configuration classes in the registry.
 	 */
 	@Override
@@ -259,11 +260,14 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	/**
+	 *
+	 * 处理配置类,并生成BeanDefinition
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
 	 */
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();
+		// 取出当前容器中存在的全部BeanDefinition,如果不考虑用户手动添加的BeanDefinition的话,那么这里拿出来的就是spring容器在初始化Reader时添加的那五个Bean
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
 		for (String beanName : candidateNames) {
@@ -273,6 +277,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
 			}
+			// 这一步过滤掉不是配置类的BeanDefinition,过滤条件详细注释见ConfigurationClassUtils.checkConfigurationClassCandidate方法中的内部注释
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
@@ -280,6 +285,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 		// Return immediately if no @Configuration classes were found
 		if (configCandidates.isEmpty()) {
+			// 通过上面的筛选过滤,如果没有配置类,就不需要进行处理,直接返回
 			return;
 		}
 
@@ -295,6 +301,13 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (registry instanceof SingletonBeanRegistry) {
 			sbr = (SingletonBeanRegistry) registry;
 			if (!this.localBeanNameGeneratorSet) {
+				/**
+				 * 自定义BeanName生成器,可以参见Demo  spring-study模块下的CustomBeanNameGenerator </br>
+				 * !!!注意!!!
+				 * 由于这里是从单例池中根据beanName去获取BeanNameGenerator,所以需要在spring启动的时候手动的往spring
+				 * 容器中单例池中注册自定义的名称生成器</br>
+				 * applicationContext.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,new CustomBeanNameGenerator());
+ 				 */
 				BeanNameGenerator generator = (BeanNameGenerator) sbr.getSingleton(
 						AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR);
 				if (generator != null) {
@@ -309,6 +322,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		}
 
 		// Parse each @Configuration class
+		// new一个配置解析类,注意ConfigurationClassParser构造方法,构造方法中new了ComponentScanAnnotationParser和ConditionEvaluator
 		ConfigurationClassParser parser = new ConfigurationClassParser(
 				this.metadataReaderFactory, this.problemReporter, this.environment,
 				this.resourceLoader, this.componentScanBeanNameGenerator, registry);
@@ -316,9 +330,19 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<BeanDefinitionHolder> candidates = new LinkedHashSet<>(configCandidates);
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
+			// 对配置类进行解析
 			parser.parse(candidates);
+
+			// 做一些校验
 			parser.validate();
 
+			/**
+			 * 这里需要注意这个parser.getConfigurationClasses()方法获取的值是ConfigurationClassParser.configurationClasses属性,
+			 * 这个属性的赋值地方是在当前这个do-while循环的前第一行代码 parser.parse(candidates)中. 这个是在解析配置类(这个配置类
+			 * 是在当前这个方法一进来的时候通过判断确定是配置类的时候就添加到了configCandidates这个集合中的)的过程中,如果发现是配置类,
+			 * spring并没有及时的处理,而是添加到了ConfigurationClassParser.configurationClasses属性中,
+			 * 然后通过reader.loadBeanDefinitions(configClasses)这行代码去解析配置类,生成BeanDefinition并注册到BeanFactory中
+			 */
 			Set<ConfigurationClass> configClasses = new LinkedHashSet<>(parser.getConfigurationClasses());
 			configClasses.removeAll(alreadyParsed);
 
@@ -328,9 +352,17 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 						registry, this.sourceExtractor, this.resourceLoader, this.environment,
 						this.importBeanNameGenerator, parser.getImportRegistry());
 			}
+
+			// 真正的解析配置类,生成BeanDefinition并注册到BeanFactory中
 			this.reader.loadBeanDefinitions(configClasses);
 			alreadyParsed.addAll(configClasses);
 
+			/**
+			 * 下面的一段逻辑就是spring细心且操碎了心的地方<br/>
+			 * 他担心有漏掉的配置类没有解析,就每一次循环的时候都去拿全部的BeanDefinition,然后再和已存在的集合进行比较
+			 * 过滤掉已经解析过的配置类,将新的还未解析的配置类赋值给candidates,让do-while循环满足true的条件(candidates集合不为空),
+			 * 继续递归解析配置类
+			 */
 			candidates.clear();
 			if (registry.getBeanDefinitionCount() > candidateNames.length) {
 				String[] newCandidateNames = registry.getBeanDefinitionNames();

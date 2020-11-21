@@ -99,6 +99,7 @@ abstract class ConfigurationClassUtils {
 			// Check already loaded Class if present...
 			// since we possibly can't even load the class file for this Class.
 			Class<?> beanClass = ((AbstractBeanDefinition) beanDef).getBeanClass();
+			// 判断当前类是否是if判断条件中类的子类
 			if (BeanFactoryPostProcessor.class.isAssignableFrom(beanClass) ||
 					BeanPostProcessor.class.isAssignableFrom(beanClass) ||
 					AopInfrastructureBean.class.isAssignableFrom(beanClass) ||
@@ -121,10 +122,12 @@ abstract class ConfigurationClassUtils {
 			}
 		}
 
+		// 判断是否加了@Configuration注解
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
+		// 如果没有加@Configuration注解,再继续通过isConfigurationCandidate方法去判断,具体判断逻辑见isConfigurationCandidate方法中的注释
 		else if (config != null || isConfigurationCandidate(metadata)) {
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
@@ -142,6 +145,8 @@ abstract class ConfigurationClassUtils {
 	}
 
 	/**
+	 * 判断一个Bean中是否是一个配置类:
+	 * 判断的依据是,Bean的元数据中是否存在@Component,@ComponentScan,@Import,@ImportResource,@Bean注解
 	 * Check the given metadata for a configuration class candidate
 	 * (or nested component class declared within a configuration/component class).
 	 * @param metadata the metadata of the annotated class
@@ -155,6 +160,13 @@ abstract class ConfigurationClassUtils {
 		}
 
 		// Any of the typical annotations found?
+		/**
+		 * candidateIndicators这个Set集合在当前类的static方法中,就默认添加了4个值,分别是
+		 * 	1. @Component
+		 * 	2. @ComponentScan
+		 * 	3. @Import
+		 * 	4. @ImportResource
+		 */
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
@@ -163,6 +175,10 @@ abstract class ConfigurationClassUtils {
 
 		// Finally, let's look for @Bean methods...
 		try {
+			/**
+			 * 最后判断当前Bean中是否存在@Bean的注解</br>
+			 * 这里单独领出来判断@Bean的原因应该是 @Bean只能加在方法上
+			 */
 			return metadata.hasAnnotatedMethods(Bean.class.getName());
 		}
 		catch (Throwable ex) {

@@ -72,11 +72,17 @@ class ComponentScanAnnotationParser {
 		this.registry = registry;
 	}
 
-
+	/**
+	 * 解析ComponentScan注解,准备开始扫描
+	 * @param componentScan
+	 * @param declaringClass
+	 * @return
+	 */
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
 		ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this.registry,
 				componentScan.getBoolean("useDefaultFilters"), this.environment, this.resourceLoader);
 
+		// 设置beanName的生成器
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
 		boolean useInheritedGenerator = (BeanNameGenerator.class == generatorClass);
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
@@ -104,11 +110,13 @@ class ComponentScanAnnotationParser {
 			}
 		}
 
+		// 设置懒加载
 		boolean lazyInit = componentScan.getBoolean("lazyInit");
 		if (lazyInit) {
 			scanner.getBeanDefinitionDefaults().setLazyInit(true);
 		}
 
+		// 获取要扫描的包名
 		Set<String> basePackages = new LinkedHashSet<>();
 		String[] basePackagesArray = componentScan.getStringArray("basePackages");
 		for (String pkg : basePackagesArray) {
@@ -129,6 +137,8 @@ class ComponentScanAnnotationParser {
 				return declaringClass.equals(className);
 			}
 		});
+
+		// 开始扫描
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
 	}
 

@@ -1,5 +1,7 @@
 package com.monk.study.bean;
 
+import com.monk.study.service.OrderService;
+
 /**
  * @ClassName User
  * @Description: TODO
@@ -7,7 +9,7 @@ package com.monk.study.bean;
  * @Date 2020/10/28
  * @Version V1.0
  **/
-public class User {
+public class User extends ParentEntity implements ChildInterface {
 
 	private Long userId;
 
@@ -35,5 +37,16 @@ public class User {
 				"userId=" + userId +
 				", userName='" + userName + '\'' +
 				'}';
+	}
+
+
+	@Override
+	public void sayHello() {
+
+	}
+
+	@Override
+	public void say() {
+
 	}
 }

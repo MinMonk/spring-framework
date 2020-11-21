@@ -221,7 +221,12 @@ class ConfigurationClassParser {
 		return this.configurationClasses.keySet();
 	}
 
-
+	/**
+	 * 处理配置类
+	 * @param configClass
+	 * @param filter
+	 * @throws IOException
+	 */
 	protected void processConfigurationClass(ConfigurationClass configClass, Predicate<String> filter) throws IOException {
 		if (this.conditionEvaluator.shouldSkip(configClass.getMetadata(), ConfigurationPhase.PARSE_CONFIGURATION)) {
 			return;
@@ -247,6 +252,7 @@ class ConfigurationClassParser {
 		// Recursively process the configuration class and its superclass hierarchy.
 		SourceClass sourceClass = asSourceClass(configClass, filter);
 		do {
+			// 递归解析配置类,递归的是当前配置类的父类,如果存在父类就一直循环处理,直到没有父类为止
 			sourceClass = doProcessConfigurationClass(configClass, sourceClass, filter);
 		}
 		while (sourceClass != null);
@@ -255,6 +261,18 @@ class ConfigurationClassParser {
 	}
 
 	/**
+	 * 开始解析配置类的关键地方<br/>
+	 * 在解析配置类的时候,只有在解析ComponentScan注解的时候,才会生成BeanDefinition,但是这个时候生成的BeanDefinition是空的,并且类型是ScanGeneratorBeanDefinition
+	 * 如果是其他类型的注解,比方@Import,@ImportResource,@Bean,@Component注解的时候,都是将这些类or方法当做是一个配置类添加到特定的属性中去暂时存起来,后面单独处理
+	 * @See org.springframework.context.annotation.ConfigurationClassBeanDefinitionReader#loadBeanDefinitionsForConfigurationClass()
+	 * @Import比较特殊,他导入的类可以分为三种情况,首先给类的importedBy属性赋值<br/>
+	 * 		1. 实现了ImportSelector接口的类: 添加到configurationClasses属性中<br/>
+	 * 		2. 实现了ImportBeanDefinitionRegistrar接口的类: 添加到importBeanDefinitionRegistrars属性中<br/>
+	 * 		3. 普通的类: 但是通过这种方式导入的类,spring会直接当做一个配置类添加到<br/>
+	 * @Bean --> 添加到beanMethods属性中<br/>
+	 * @ImportResource --> 添加到importedResources属性中<br/>
+	 * @Component --> 添加到configurationClasses属性中<br/>
+	 *
 	 * Apply processing and build a complete {@link ConfigurationClass} by reading the
 	 * annotations, members and methods from the source class. This method can be called
 	 * multiple times as relevant sources are discovered.
@@ -269,10 +287,12 @@ class ConfigurationClassParser {
 
 		if (configClass.getMetadata().isAnnotated(Component.class.getName())) {
 			// Recursively process any member (nested) classes first
+			// 处理加了@Component注解的内部类
 			processMemberClasses(configClass, sourceClass, filter);
 		}
 
 		// Process any @PropertySource annotations
+		// 处理@PropertySource注解
 		for (AnnotationAttributes propertySource : AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), PropertySources.class,
 				org.springframework.context.annotation.PropertySource.class)) {
@@ -286,12 +306,14 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @ComponentScan annotations
+		// 处理@ComponentScan
 		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
 				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
 		if (!componentScans.isEmpty() &&
 				!this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
 			for (AnnotationAttributes componentScan : componentScans) {
 				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				// 开始扫描的逻辑,通过scan扫描出来的bd类型是ScannedGenericBeanDefinition
 				Set<BeanDefinitionHolder> scannedBeanDefinitions =
 						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
 				// Check the set of scanned definitions for any further config classes and parse recursively if needed
@@ -300,6 +322,7 @@ class ConfigurationClassParser {
 					if (bdCand == null) {
 						bdCand = holder.getBeanDefinition();
 					}
+					// 如果扫描出来的bd中存在配置类,就递归解析配置类
 					if (ConfigurationClassUtils.checkConfigurationClassCandidate(bdCand, this.metadataReaderFactory)) {
 						parse(bdCand.getBeanClassName(), holder.getBeanName());
 					}
@@ -323,15 +346,18 @@ class ConfigurationClassParser {
 		}
 
 		// Process individual @Bean methods
+		// 处理加了@Bean注解的方法
 		Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
 		for (MethodMetadata methodMetadata : beanMethods) {
 			configClass.addBeanMethod(new BeanMethod(methodMetadata, configClass));
 		}
 
 		// Process default methods on interfaces
+		// 处理@Bean加在了实现了接口而重写了接口方法上的方法
 		processInterfaces(configClass, sourceClass);
 
 		// Process superclass, if any
+		// 如果当前类存在父类,就返回父类出去,递归解析父类,直到没有父类,递归结束
 		if (sourceClass.getMetadata().hasSuperClass()) {
 			String superclass = sourceClass.getMetadata().getSuperClassName();
 			if (superclass != null && !superclass.startsWith("java") &&

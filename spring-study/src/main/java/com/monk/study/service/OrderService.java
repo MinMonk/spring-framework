@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 
 @Component
-public class OrderService {
+public class OrderService{
 
 	@Autowired
 	private HelloService helloService;
