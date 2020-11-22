@@ -2,10 +2,7 @@ package com.monk.study;
 
 import com.monk.study.bean.User;
 import com.monk.study.config.AppConfig;
-import com.monk.study.service.CustomBeanNameGenerator;
-import com.monk.study.service.HelloService;
-import com.monk.study.service.TestFactoryBean;
-import com.monk.study.service.UserService;
+import com.monk.study.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigUtils;
@@ -14,6 +11,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.Environment;
 
 import java.util.Locale;
+import java.util.function.Supplier;
 
 /**
  * @ClassName App
@@ -29,9 +27,10 @@ public class App {
 		applicationContext.register(AppConfig.class);
 
 		// 自定义BeanName生成器
-		applicationContext.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,new CustomBeanNameGenerator());
+		// applicationContext.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,new CustomBeanNameGenerator());
 		applicationContext.refresh();
-		UserService userService = applicationContext.getBean("userService", UserService.class);
+		UserService userService = (UserService)applicationContext.getBean("userService");
+		userService.getUser();
 
 		applicationContext.close();
 

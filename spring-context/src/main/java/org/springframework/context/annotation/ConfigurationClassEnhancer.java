@@ -266,6 +266,8 @@ class ConfigurationClassEnhancer {
 
 
 	/**
+	 *
+	 * 加了@Bean的方法拦截器
 	 * Intercepts the invocation of any {@link Bean}-annotated methods in order to ensure proper
 	 * handling of bean semantics such as scoping and AOP proxying.
 	 * @see Bean
@@ -274,6 +276,8 @@ class ConfigurationClassEnhancer {
 	private static class BeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
 
 		/**
+		 * 对于加了@Bean的方法进行一个拦截,
+		 *
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the
 		 * existence of this bean object.
 		 * @throws Throwable as a catch-all for any exception that may be thrown when invoking the
@@ -314,6 +318,11 @@ class ConfigurationClassEnhancer {
 				}
 			}
 
+			/**
+			 * 判断当前执行的方法和加了@Bean注解的方法名是否一致,如果是一致,说明当前的方法是一个定义的Bean,就执行方法中的逻辑,返回对应的Bean
+			 * 如果不一致,那就说明当前正在执行的方法是被调用的,那么就走resolveBeanReference这个逻辑,而这个逻辑的大概就是先从BeanFactory中
+			 * 根据beanName去获取bean对象,如果获取不到就生成一个bean,获取得到就将获取到的bean对象返回出去
+			 */
 			if (isCurrentlyInvokedFactoryMethod(beanMethod)) {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually

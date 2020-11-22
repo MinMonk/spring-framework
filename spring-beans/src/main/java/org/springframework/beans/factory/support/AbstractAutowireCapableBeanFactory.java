@@ -579,6 +579,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
+			// 实例化Bean
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		Object bean = instanceWrapper.getWrappedInstance();
@@ -628,7 +629,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			 */
 			populateBean(beanName, mbd, instanceWrapper);
 
-			// 实例化Bean逻辑，该方法中也有可扩展的地方
+			// 初始化Bean，该方法中也有可扩展的地方
 			exposedObject = initializeBean(beanName, exposedObject, mbd);
 		}
 		catch (Throwable ex) {
@@ -1210,6 +1211,18 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					"Bean class isn't public, and non-public access not allowed: " + beanClass.getName());
 		}
 
+		/**
+		 *
+		 * spring提供的一个扩展点,支持用户自己来实现Supplier.get()方法来自定义一个bean的创建逻辑,使用方法如下:<br/>
+		 * applicationContext.registerBean(UserService.class, new Supplier<UserService>() {
+		 * 		@Override
+		 *		public UserService get() {
+		 *			System.out.println("自定义的UserService.get()");
+		 * 			return new UserService();
+		 *      }
+		 * });
+		 *
+		 */
 		Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
 		if (instanceSupplier != null) {
 			return obtainFromSupplier(instanceSupplier, beanName);
@@ -1240,7 +1253,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Candidate constructors for autowiring?
+		// 筛选类中的构造方法
 		Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
+
+		/**
+		 * 如果满足下述的任一条件,都需要进行构造方法推断,具体推断逻辑件方法内部中的注释<br/>
+		 * 	1. 上一步找出来的构造方法数组ctors不能为空(毕竟只有存在构造方法才有进行构造方法推断的必要嘛)
+		 * 	2. 当前类的BeanDefinition中的自动装配模式为byConstructor,不是默认的NO,也不是byName或byType
+		 * 	3. 当前类的BeanDefinition中指定了构造方法参数值
+		 * 	4. 用于构造方法调用的参数不为空(这个情况,猜测是用于根据参数去推断构造方法)
+		 */
 		if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR ||
 				mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args)) {
 			return autowireConstructor(beanName, mbd, ctors, args);
@@ -1325,6 +1347,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+					/**
+					 * 确定bean的构造方法,这里可以参见下面的实现类是怎么筛选类的构造方法的
+					 * @See org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#determineCandidateConstructors()
+					 * 这里应该用户也进行自定义构造方法推断的逻辑,实现SmartInstantiationAwareBeanPostProcessor接口即可,然后将其注册到spring容器中即可
+					 */
 					Constructor<?>[] ctors = ibp.determineCandidateConstructors(beanClass, beanName);
 					if (ctors != null) {
 						return ctors;

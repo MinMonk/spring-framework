@@ -254,6 +254,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		this.injectionMetadataCache.remove(beanName);
 	}
 
+	/**
+	 * 筛选类上的构造方法
+	 * @param beanClass
+	 * @param beanName
+	 * @return
+	 * @throws BeanCreationException
+	 */
 	@Override
 	@Nullable
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, final String beanName)
@@ -294,14 +301,17 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 		}
 
 		// Quick check on the concurrent map first, with minimal locking.
+		// 先从缓存中获取beanClass的构造方法,如果存在缓存并且构造方法的个数大于0就返回,反之返回null
 		Constructor<?>[] candidateConstructors = this.candidateConstructorsCache.get(beanClass);
 		if (candidateConstructors == null) {
 			// Fully synchronized resolution now...
 			synchronized (this.candidateConstructorsCache) {
 				candidateConstructors = this.candidateConstructorsCache.get(beanClass);
+				// 如果缓存中不存在当前这个beanClass对象的构造方法, 下面就开始推断当前beanClass的构造方法
 				if (candidateConstructors == null) {
 					Constructor<?>[] rawCandidates;
 					try {
+						// 获取当前类的全部构造方法
 						rawCandidates = beanClass.getDeclaredConstructors();
 					}
 					catch (Throwable ex) {
@@ -312,15 +322,23 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					List<Constructor<?>> candidates = new ArrayList<>(rawCandidates.length);
 					Constructor<?> requiredConstructor = null;
 					Constructor<?> defaultConstructor = null;
+					// 这个方法和Kotlin相关,有点看不懂,暂且跳过,应该和java没有多大关系
 					Constructor<?> primaryConstructor = BeanUtils.findPrimaryConstructor(beanClass);
 					int nonSyntheticConstructors = 0;
+
+					// 遍历全部的构造方法,将构造方法进行分类
 					for (Constructor<?> candidate : rawCandidates) {
+						// 同理,这里的if-else if应该都是Kotlin相关的判断,暂且跳过
 						if (!candidate.isSynthetic()) {
 							nonSyntheticConstructors++;
 						}
 						else if (primaryConstructor != null) {
 							continue;
 						}
+						/**
+						 * 这里虽然是调用查找加了@Autowired、@Value、@Inject注解的方法,但是@Value是不可以加在方法上,
+						 * 而@Inject这个注解是存在javax.inject.Inject这个注解的是才会被解析
+						 */
 						MergedAnnotation<?> ann = findAutowiredAnnotation(candidate);
 						if (ann == null) {
 							Class<?> userClass = ClassUtils.getUserClass(beanClass);
@@ -335,29 +353,53 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 								}
 							}
 						}
+
+						// 这个if里的判断是如果存在@Autowired注解的构造方法
 						if (ann != null) {
+							// 如果已经存在了@Autowired(require=true)的构造方法,还存在加了@Autowired注解的构造方法,不论require属性是否为true,都直接报错
 							if (requiredConstructor != null) {
 								throw new BeanCreationException(beanName,
 										"Invalid autowire-marked constructor: " + candidate +
 										". Found constructor with 'required' Autowired annotation already: " +
 										requiredConstructor);
 							}
+							// 解析@Autowired中的require属性
 							boolean required = determineRequiredStatus(ann);
 							if (required) {
+								/**
+								 * 这里如果candidates不为空,说明该类已经有@Autowired注解的方法,只不过require=false
+								 * 那么现在又存在一个require=true的构造方法,那么不好意思直接抛出异常
+								 */
 								if (!candidates.isEmpty()) {
 									throw new BeanCreationException(beanName,
 											"Invalid autowire-marked constructors: " + candidates +
 											". Found constructor with 'required' Autowired annotation: " +
 											candidate);
 								}
+								/**
+								 * 如果@Autowired注解的属性require=true,那么就将当前构造方法赋值给了requireConstructor,这个属性在
+								 * 当前这个if中就有判断.参见前两行
+								 */
 								requiredConstructor = candidate;
 							}
 							candidates.add(candidate);
 						}
 						else if (candidate.getParameterCount() == 0) {
+							/**
+							 * 对于没有加@Autowired注解的,并且是没有参数的构造方法,将他设置为默认的构造方法
+							 * 所以对于那些有多个参数,但是没有加@Autowired注解的构造方法,spring不予理会
+							 */
 							defaultConstructor = candidate;
 						}
 					}
+
+					/**
+					 * 经过上面的构造方法循环之后,那么candidates这个集合里存的构造方法都是加了@Autowirede注解的构造方法
+					 * 如果存在加了@Autowired注解的构造方法,但是requireConstructor属性又为空,那么就说明当前列中不存在@Autowired(require=true)
+					 * 的构造方法,如果在这种情况下
+					 * 	1. 存在默认的无参构造方法,那么就需要把默认的无参构造方法也添加到构造方法候选者candidates集合中一并返回出去
+					 * 	2. 不存在默认的无参构造方法,那么就打印一行日志,再将构造方法候选者candidates集合返回出去
+					 */
 					if (!candidates.isEmpty()) {
 						// Add default constructor to list of optional constructors, as fallback.
 						if (requiredConstructor == null) {
@@ -373,6 +415,10 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						}
 						candidateConstructors = candidates.toArray(new Constructor<?>[0]);
 					}
+					/**
+					 * 这里还有一种情况:<br/>
+					 * 如果类中不存在无参构造方法,并且不存在加了@Autowired注解的构造方法,并且有且只有一个有参构造方法,那么这里就直接返回这个构造方法
+					 */
 					else if (rawCandidates.length == 1 && rawCandidates[0].getParameterCount() > 0) {
 						candidateConstructors = new Constructor<?>[] {rawCandidates[0]};
 					}
@@ -384,6 +430,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 						candidateConstructors = new Constructor<?>[] {primaryConstructor};
 					}
 					else {
+						// 如果类中不存在任何构造方法,那么就返回一个默认的无参构造方法出去
 						candidateConstructors = new Constructor<?>[0];
 					}
 					this.candidateConstructorsCache.put(beanClass, candidateConstructors);
@@ -543,8 +590,8 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	/**
-	 * 判断是否加了@Autowired、@Value、@Inject注解
-	 *  判断的优先级：@Autowired  >   @Value  >  @Inject
+	 * 判断是否加了@Autowired、@Value、@Inject注解 <
+	 *  判断的优先级：@Autowired  >   @Value  >  @Inject(存在javax.inject.Inject这个类,才会判断)
 	 * @See org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#AutowiredAnnotationBeanPostProcessor()
 	 * @param ao
 	 * @return

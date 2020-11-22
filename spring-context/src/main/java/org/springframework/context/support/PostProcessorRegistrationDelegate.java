@@ -54,8 +54,9 @@ final class PostProcessorRegistrationDelegate {
 
 
 	/**
-	 * 按照下列顺序依次执行
-	 * 	1. org.springframework.context.annotation.ConfigurationClassPostProcessor.postProcessBeanDefinitionRegistry()
+	 * 执行Bean工厂中的后置处理器,先执行子接口中的注册BeanDefinition方法postProcessBeanDefinitionRegistry
+	 * 再执行父接口中的BeanFactory后置处理器方法postProcessBeanFactory<br/>
+	 * 执行顺序都是先执行实现了PriorityOrder >>>  Order  >>>  没有实现前面两个接口后置处理器
 	 * @param beanFactory
 	 * @param beanFactoryPostProcessors
 	 */

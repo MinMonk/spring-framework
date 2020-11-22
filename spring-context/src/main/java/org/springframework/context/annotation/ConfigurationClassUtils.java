@@ -125,13 +125,19 @@ abstract class ConfigurationClassUtils {
 		// 判断是否加了@Configuration注解
 		Map<String, Object> config = metadata.getAnnotationAttributes(Configuration.class.getName());
 		if (config != null && !Boolean.FALSE.equals(config.get("proxyBeanMethods"))) {
+			/**
+			 * 如果加了@Configuration,并且该注解中的属性proxyBeanMethods为true(默认也为true),就设置该属性为full,
+			 * 在后续的类中,会对该属性为full的类生成代理类
+			 */
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_FULL);
 		}
 		// 如果没有加@Configuration注解,再继续通过isConfigurationCandidate方法去判断,具体判断逻辑见isConfigurationCandidate方法中的注释
 		else if (config != null || isConfigurationCandidate(metadata)) {
+			// 这里设置的属性,没有地方使用,姑且理解为标记一下吧,或者在后期的版本中会用到
 			beanDef.setAttribute(CONFIGURATION_CLASS_ATTRIBUTE, CONFIGURATION_CLASS_LITE);
 		}
 		else {
+			//如果没有加@Configuration注解,并且经过判断也不是一个配置类,那么就直接返回null
 			return false;
 		}
 

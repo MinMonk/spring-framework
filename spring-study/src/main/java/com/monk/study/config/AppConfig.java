@@ -26,9 +26,16 @@ import java.util.Map;
  * @Date 2020/10/23
  * @Version V1.0
  **/
-@Configuration
+//@Configuration
 @ComponentScan("com.monk.study")
 public class AppConfig {
+
+	@Bean
+	public User user(){
+		User user = new User();
+		user.setUserName("jack");
+		return user;
+	}
 
 	/*@Bean
 	public MessageSource messageSource(){
