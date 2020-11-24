@@ -110,7 +110,7 @@ class ConstructorResolver {
 
 	/**
 	 *
-	 * 构造方法推断
+	 * 构造方法推断以及实例化
 	 * "autowire constructor" (with constructor arguments by type) behavior.
 	 * Also applied if explicit constructor argument values are specified,
 	 * matching all remaining arguments with beans from the bean factory.

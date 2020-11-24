@@ -25,12 +25,14 @@ public class App {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.register(AppConfig.class);
+		applicationContext.getBeanFactory().addBeanPostProcessor(new CustomDetermineCandidateConstructors());
+//		applicationContext.register(CustomDetermineCandidateConstructors.class);
 
 		// 自定义BeanName生成器
 		// applicationContext.getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,new CustomBeanNameGenerator());
 		applicationContext.refresh();
 		UserService userService = (UserService)applicationContext.getBean("userService");
-		userService.getUser();
+		//userService.getUser();
 
 		applicationContext.close();
 

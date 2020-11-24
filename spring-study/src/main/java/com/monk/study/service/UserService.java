@@ -8,18 +8,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserService{
 
-	@Autowired
-	private User user;
-
-	@Autowired
-	public UserService(User user) {
-		this.user = user;
-		user.setUserName("111");
-		System.out.println("一个参数构造方法");
+	public UserService(){
+		System.out.println("无参构造方法");
 	}
 
-	public void getUser(){
-		System.out.println(this.user);
+	//@Autowired
+	public UserService(User user){
+		System.out.println("1参构造方法");
 	}
 
 }

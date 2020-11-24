@@ -1253,7 +1253,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Candidate constructors for autowiring?
-		// 筛选类中的构造方法
+		/**
+		 * 筛选类中的构造方法
+		 * 如果类中有且只有一个无参的构造方法或者没有任何构造方法，这里都会返回null，
+		 * 然后在当前方法的最后一行，默认执行无参的构造方法去实例化当前类
+		 */
 		Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
 
 		/**
@@ -1265,6 +1269,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		 */
 		if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR ||
 				mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args)) {
+			// 自动去推导合适的构造方法并用推导出来的构造方法实例化当前类
 			return autowireConstructor(beanName, mbd, ctors, args);
 		}
 
@@ -1275,6 +1280,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// No special handling: simply use no-arg constructor.
+		// 默认用无参的构造方法去实例化Bean
 		return instantiateBean(beanName, mbd);
 	}
 
@@ -1331,6 +1337,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	}
 
 	/**
+	 * 确定构造方法的候选者（通俗理解就是筛选过滤类的构造方法）
 	 * Determine candidate constructors to use for the given bean, checking all registered
 	 * {@link SmartInstantiationAwareBeanPostProcessor SmartInstantiationAwareBeanPostProcessors}.
 	 * @param beanClass the raw class of the bean
@@ -1350,7 +1357,12 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					/**
 					 * 确定bean的构造方法,这里可以参见下面的实现类是怎么筛选类的构造方法的
 					 * @See org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor#determineCandidateConstructors()
-					 * 这里应该用户也进行自定义构造方法推断的逻辑,实现SmartInstantiationAwareBeanPostProcessor接口即可,然后将其注册到spring容器中即可
+					 * 这里应该用户也进行自定义构造方法过滤的逻辑,实现SmartInstantiationAwareBeanPostProcessor接口即可,然后将其注册到spring容器中即可</br>
+					 * 如果添加自定义的过滤器，这里是存在优化空间的：
+					 * 使用applicationContext.getBeanFactory().addBeanPostProcessor(new CustomDetermineCandidateConstructors());这种方式注册的构造方法过滤器会在spring默认的
+					 * AutowiredAnnotationBeanPostProcessor这个处理器之前执行；而直接在自定义的构造方法过滤器上加@Component或者ctx.register()这种方式是会在spring默认的构造方法
+					 * 过滤器之后执行的
+					 *
 					 */
 					Constructor<?>[] ctors = ibp.determineCandidateConstructors(beanClass, beanName);
 					if (ctors != null) {
