@@ -35,9 +35,8 @@ public class App {
 		//UserService userService = (UserService)applicationContext.getBean("userService");
 		//userService.getUser();
 
-		UserMapper userMapper = applicationContext.getBean(UserMapper.class);
-		userMapper.user();
-
+		UserService userService = applicationContext.getBean(UserService.class);
+		userService.test();
 		applicationContext.close();
 
 	}

@@ -2,7 +2,6 @@ package com.monk.study.service;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;

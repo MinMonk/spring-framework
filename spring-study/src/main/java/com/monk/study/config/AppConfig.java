@@ -2,9 +2,11 @@ package com.monk.study.config;
 
 import com.monk.study.bean.User;
 import com.monk.study.service.StringToUserPropertyEditor;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.config.CustomEditorConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 import java.beans.PropertyEditor;
 import java.util.HashMap;
@@ -17,9 +19,10 @@ import java.util.Map;
  * @Date 2020/10/23
  * @Version V1.0
  **/
-//@Configuration
+@Configuration
 @ComponentScan("com.monk.study")
-//@MapperScan
+//@MapperScan("com.monk.study.mapper")
+@CustomScan("com.monk.study.mapper")
 public class AppConfig {
 
 	/*@Bean

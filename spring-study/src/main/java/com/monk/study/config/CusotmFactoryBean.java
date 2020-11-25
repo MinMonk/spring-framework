@@ -1,8 +1,8 @@
 package com.monk.study.config;
 
-import com.sun.deploy.net.proxy.ProxyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationHandler;
@@ -17,29 +17,38 @@ import java.lang.reflect.Proxy;
  * @Version V1.0
  **/
 @Component
-public class CusotmFactoryBean implements FactoryBean {
+public class CusotmFactoryBean<T> implements FactoryBean<T> {
 
-	private Class mapperInterface;
+	public static final Logger logegr = LoggerFactory.getLogger(CusotmFactoryBean.class);
 
-	public CusotmFactoryBean(Class mapperInterface){
+	private Class<T> mapperInterface;
+
+	public CusotmFactoryBean() {
+	}
+
+	public CusotmFactoryBean(Class<T> mapperInterface){
 		this.mapperInterface = mapperInterface;
 	}
 
 	@Override
-	public Object getObject() throws Exception {
+	public T getObject() throws Exception {
 
 		Object object = Proxy.newProxyInstance(mapperInterface.getClassLoader(), new Class[]{mapperInterface}, new InvocationHandler() {
 			@Override
 			public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-				System.out.println(method.getName());
-				return null;
+				logegr.info("动态代理执行的逻辑:{}", method.getName());
+				return proxy;
 			}
 		});
-		return object;
+		return (T) object;
 	}
 
 	@Override
-	public Class<?> getObjectType() {
+	public Class<T> getObjectType() {
 		return mapperInterface;
+	}
+
+	public void setMapperInterface(Class<T> mapperInterface) {
+		this.mapperInterface = mapperInterface;
 	}
 }

@@ -3,8 +3,8 @@ package com.monk.study.service;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
-import org.springframework.stereotype.Component;
 
+//@Component
 public class CustomBeanNameGenerator implements BeanNameGenerator {
 
 	@Override
