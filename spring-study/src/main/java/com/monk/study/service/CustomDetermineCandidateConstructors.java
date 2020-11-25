@@ -16,9 +16,16 @@ import java.util.List;
  * @Date 2020/11/24
  * @Version V1.0
  **/
- @Component
+ //@Component
 public class CustomDetermineCandidateConstructors implements SmartInstantiationAwareBeanPostProcessor {
 
+	/**
+	 * 这里只是一个简单的demo，过滤userService构造方法参数为一个的构造方法
+	 * @param beanClass the raw class of the bean (never {@code null})
+	 * @param beanName the name of the bean
+	 * @return
+	 * @throws BeansException
+	 */
 	@Override
 	public Constructor<?>[] determineCandidateConstructors(Class<?> beanClass, String beanName) throws BeansException {
 		Constructor<?>[] rawCandidates = beanClass.getDeclaredConstructors();

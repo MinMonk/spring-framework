@@ -8,7 +8,7 @@ import javax.annotation.PreDestroy;
 @Component
 public class OrderService{
 
-	@Autowired
+	//@Autowired
 	private HelloService helloService;
 
 	@PreDestroy

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * @Date 2020/10/29
  * @Version V1.0
  **/
-@Component
+//@Component
 public class TestFactoryBean implements FactoryBean {
 	@Override
 	public Object getObject() throws Exception {

@@ -3,7 +3,7 @@ package com.monk.study.service;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class CustomSpringContextLifeCycle implements SmartLifecycle {
 
 	@Override

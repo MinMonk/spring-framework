@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class BaseService<T> {
 
-	@Autowired
+	//@Autowired
 	private T t;
 
 	public T getT() {
