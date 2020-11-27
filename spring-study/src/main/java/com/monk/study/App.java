@@ -35,9 +35,13 @@ public class App {
 		//UserService userService = (UserService)applicationContext.getBean("userService");
 		//userService.getUser();
 
-		UserService userService = applicationContext.getBean(UserService.class);
-		userService.test();
-		applicationContext.close();
+//		UserService userService = applicationContext.getBean(UserService.class);
+//		userService.test();
+
+		AService bean = applicationContext.getBean(AService.class);
+		bean.test();
+
+		//applicationContext.close();
 
 	}
 }

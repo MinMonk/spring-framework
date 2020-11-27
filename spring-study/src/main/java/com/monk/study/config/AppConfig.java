@@ -7,6 +7,7 @@ import org.springframework.beans.factory.config.CustomEditorConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.beans.PropertyEditor;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import java.util.Map;
 @ComponentScan("com.monk.study")
 //@MapperScan("com.monk.study.mapper")
 @CustomScan("com.monk.study.mapper")
+@EnableAspectJAutoProxy
 public class AppConfig {
 
 	/*@Bean
