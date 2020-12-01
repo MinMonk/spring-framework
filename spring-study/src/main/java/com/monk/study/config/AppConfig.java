@@ -3,6 +3,8 @@ package com.monk.study.config;
 import com.monk.study.bean.User;
 import com.monk.study.service.StringToUserPropertyEditor;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator;
+import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.config.CustomEditorConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -26,6 +28,24 @@ import java.util.Map;
 @CustomScan("com.monk.study.mapper")
 @EnableAspectJAutoProxy
 public class AppConfig {
+
+	@Bean
+	public BeanNameAutoProxyCreator beanNameAutoProxyCreator(){
+		BeanNameAutoProxyCreator beanNameAutoProxyCreator = new BeanNameAutoProxyCreator();
+		beanNameAutoProxyCreator.setBeanNames("proxyService");
+		//beanNameAutoProxyCreator.set
+
+
+
+		return beanNameAutoProxyCreator;
+	}
+
+//	@Bean
+//	public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator(){
+//		DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
+//
+//		return defaultAdvisorAutoProxyCreator;
+//	}
 
 	/*@Bean
 	public User user(){

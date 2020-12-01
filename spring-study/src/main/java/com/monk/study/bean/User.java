@@ -9,7 +9,7 @@ import com.monk.study.service.OrderService;
  * @Date 2020/10/28
  * @Version V1.0
  **/
-public class User extends ParentEntity implements ChildInterface {
+public class User {
 
 	private Long userId;
 
@@ -31,22 +31,4 @@ public class User extends ParentEntity implements ChildInterface {
 		this.userName = userName;
 	}
 
-	@Override
-	public String toString() {
-		return "User{" +
-				"userId=" + userId +
-				", userName='" + userName + '\'' +
-				'}';
-	}
-
-
-	@Override
-	public void sayHello() {
-
-	}
-
-	@Override
-	public void say() {
-
-	}
 }
