@@ -10,7 +10,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.sql.DataSource;
 import java.beans.PropertyEditor;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +32,22 @@ import java.util.Map;
 //@MapperScan("com.monk.study.mapper")
 @CustomScan("com.monk.study.mapper")
 @EnableAspectJAutoProxy
+@EnableTransactionManagement
 public class AppConfig {
+
+	@Bean
+	public PlatformTransactionManager platformTransactionManager(){
+		DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
+		dataSourceTransactionManager.setDataSource(dataSource());
+		return dataSourceTransactionManager;
+	}
+
+	@Bean
+	public DataSource dataSource(){
+		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+		//dataSource.setUrl();
+		return dataSource;
+	}
 
 	@Bean
 	public BeanNameAutoProxyCreator beanNameAutoProxyCreator(){
