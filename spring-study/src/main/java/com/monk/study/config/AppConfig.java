@@ -30,9 +30,9 @@ import java.util.Map;
 @Configuration
 @ComponentScan("com.monk.study")
 //@MapperScan("com.monk.study.mapper")
-@CustomScan("com.monk.study.mapper")
+//@CustomScan("com.monk.study.mapper")
 @EnableAspectJAutoProxy
-@EnableTransactionManagement
+//@EnableTransactionManagement
 public class AppConfig {
 
 	@Bean
