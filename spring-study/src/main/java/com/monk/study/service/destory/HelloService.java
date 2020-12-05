@@ -1,4 +1,4 @@
-package com.monk.study.service;
+package com.monk.study.service.destory;
 
 import com.monk.study.bean.User;
 import org.springframework.beans.factory.DisposableBean;
@@ -15,10 +15,10 @@ import javax.annotation.PreDestroy;
  * @Date 2020/10/23
  * @Version V1.0
  **/
-//@Service("helloService")
+@Service("helloService")
 public class HelloService implements DisposableBean {
 
-	//@Value("zhangsan")
+	@Value("zhangsan")
 	private User user;
 
 	public void sayHello(){

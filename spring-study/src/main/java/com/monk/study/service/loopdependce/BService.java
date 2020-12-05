@@ -1,4 +1,4 @@
-package com.monk.study.service;
+package com.monk.study.service.loopdependce;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

@@ -1,4 +1,4 @@
-package com.monk.study.config;
+package com.monk.study.custommapper;
 
 import org.springframework.context.annotation.Import;
 

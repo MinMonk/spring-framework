@@ -1,4 +1,4 @@
-package com.monk.study.service;
+package com.monk.study.service.destory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,7 +8,7 @@ import javax.annotation.PreDestroy;
 @Component
 public class OrderService{
 
-	//@Autowired
+	@Autowired
 	private HelloService helloService;
 
 	@PreDestroy

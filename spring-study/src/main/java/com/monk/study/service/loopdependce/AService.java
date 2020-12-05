@@ -1,8 +1,5 @@
-package com.monk.study.service;
+package com.monk.study.service.loopdependce;
 
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -14,7 +11,6 @@ import org.springframework.stereotype.Component;
  * @Date 2020/11/27
  * @Version V1.0
  **/
-@Aspect
 @Component
 @Lazy
 public class AService {
@@ -22,7 +18,10 @@ public class AService {
 	@Autowired
 	private BService bService;
 
-
+	/**
+	 * 如果通过构造方法的方式去循环依赖自动注入,spring默认情况下会失败,但是可以通过在类上加@Lazy的方式来完成自动注入
+	 * @param bService
+	 */
 	public AService(BService bService){
 		this.bService = bService;
 	}
@@ -30,8 +29,7 @@ public class AService {
 //	@Autowired
 //	private CService cService;
 
-	@Pointcut("execution(public * com.monk.study.service.AService.test(..))")
 	public void test(){
-		System.out.println("before...");
+		System.out.println("test...");
 	}
 }

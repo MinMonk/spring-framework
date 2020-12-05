@@ -1,4 +1,4 @@
-package com.monk.study.proxy;
+package com.monk.study.aopproxy;
 
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @Version V1.0
  **/
 @Component("proxyService")
-public class ProxyServiceImpl implements ProxySerivce {
+public class ProxyServiceImpl implements ProxyService {
 
 	@Override
 	public void say() {

@@ -1,9 +1,5 @@
 package com.monk.study.bean;
 
-import com.monk.study.service.OrderService;
-
-import java.lang.reflect.Field;
-
 /**
  * @ClassName User
  * @Description: TODO
@@ -12,6 +8,14 @@ import java.lang.reflect.Field;
  * @Version V1.0
  **/
 public class User {
+
+	public User() {
+	}
+
+	public User(Long userId, String userName) {
+		this.userId = userId;
+		this.userName = userName;
+	}
 
 	private Long userId;
 

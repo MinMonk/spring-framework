@@ -294,6 +294,10 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	@Override
 	public Object postProcessAfterInitialization(@Nullable Object bean, String beanName) {
 		if (bean != null) {
+			/**
+			 * 先根据cacheKey(几乎可以理解为beanName)从缓存中获取代理,如果缓存中没有再调用wrapIfNecessary
+			 * 方法,在方法内部会判断是否需要进行aop增强,需要则产生代理对象
+			 */
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
 				return wrapIfNecessary(bean, beanName, cacheKey);
@@ -315,6 +319,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return the cache key for the given class and name
 	 */
 	protected Object getCacheKey(Class<?> beanClass, @Nullable String beanName) {
+		/**
+		 * 如果beanName不为空,再判断当前class是不是FactoryBean,如果是就在& + beanName
+		 * 如果是非FactoryBean,就直接返回beanName
+		 * 如果beanName为空,就直接返回beanClass
+		 */
 		if (StringUtils.hasLength(beanName)) {
 			return (FactoryBean.class.isAssignableFrom(beanClass) ?
 					BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
@@ -463,9 +472,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			}
 		}
 
+		// 构建Advisors
 		Advisor[] advisors = buildAdvisors(beanName, specificInterceptors);
 		proxyFactory.addAdvisors(advisors);
 		proxyFactory.setTargetSource(targetSource);
+
+		// 提供给子类去自定义代理工厂,当前spring没有实现
 		customizeProxyFactory(proxyFactory);
 
 		proxyFactory.setFrozen(this.freezeProxy);

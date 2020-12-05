@@ -1,7 +1,7 @@
 package com.monk.study;
 
 import com.monk.study.config.AppConfig;
-import com.monk.study.service.HelloService;
+import com.monk.study.service.destory.HelloService;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 

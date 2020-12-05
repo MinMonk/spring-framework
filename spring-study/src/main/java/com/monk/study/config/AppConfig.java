@@ -2,6 +2,7 @@ package com.monk.study.config;
 
 import com.monk.study.bean.User;
 import com.monk.study.service.StringToUserPropertyEditor;
+import org.aspectj.lang.annotation.Before;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.aop.framework.autoproxy.BeanNameAutoProxyCreator;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
@@ -28,45 +29,8 @@ import java.util.Map;
  * @Version V1.0
  **/
 @Configuration
-@ComponentScan("com.monk.study")
-//@MapperScan("com.monk.study.mapper")
-//@CustomScan("com.monk.study.mapper")
-@EnableAspectJAutoProxy
-//@EnableTransactionManagement
+@ComponentScan("com.monk.study.service")
 public class AppConfig {
-
-	@Bean
-	public PlatformTransactionManager platformTransactionManager(){
-		DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
-		dataSourceTransactionManager.setDataSource(dataSource());
-		return dataSourceTransactionManager;
-	}
-
-	@Bean
-	public DataSource dataSource(){
-		DriverManagerDataSource dataSource = new DriverManagerDataSource();
-		//dataSource.setUrl();
-		return dataSource;
-	}
-
-	@Bean
-	public BeanNameAutoProxyCreator beanNameAutoProxyCreator(){
-		BeanNameAutoProxyCreator beanNameAutoProxyCreator = new BeanNameAutoProxyCreator();
-		beanNameAutoProxyCreator.setBeanNames("proxyService");
-		//beanNameAutoProxyCreator.set
-
-
-
-		return beanNameAutoProxyCreator;
-	}
-
-//	@Bean
-//	public DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator(){
-//		DefaultAdvisorAutoProxyCreator defaultAdvisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
-//
-//		return defaultAdvisorAutoProxyCreator;
-//	}
-
 	/*@Bean
 	public User user(){
 		User user = new User();
@@ -99,14 +63,14 @@ public class AppConfig {
 	 * 配置一个@Value的值转换器
 	 * @return
 	 */
-	/*@Bean
+	@Bean
 	public CustomEditorConfigurer customEditorConfigurer(){
 		CustomEditorConfigurer customEditorConfigurer = new CustomEditorConfigurer();
 		Map<Class<?>, Class<? extends PropertyEditor>> customEditors = new HashMap<>();
 		customEditors.put(User.class, StringToUserPropertyEditor.class);
 		customEditorConfigurer.setCustomEditors(customEditors);
 		return customEditorConfigurer;
-	}*/
+	}
 
 	/*@Bean
 	public ConversionServiceFactoryBean conversionServiceFactoryBean(){

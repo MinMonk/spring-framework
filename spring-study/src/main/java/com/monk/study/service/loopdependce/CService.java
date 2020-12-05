@@ -1,4 +1,4 @@
-package com.monk.study.service;
+package com.monk.study.service.loopdependce;
 
 import org.springframework.stereotype.Component;
 
