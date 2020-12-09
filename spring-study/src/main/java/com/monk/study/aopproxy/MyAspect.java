@@ -9,8 +9,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class MyAspect {
 
+	@Pointcut("execution(public * com.monk.study.aopproxy.ProxyService.*(..))")
+	public void jdkMethod(){};
+
 	@Pointcut("execution(public * com.monk.study.aopproxy.ProxyServiceDemo.*(..))")
 	public void sayMethod(){};
+
+	@Before("jdkMethod()")
+	public void beforeJdkAdvice(JoinPoint joinPoint){
+		System.out.println("beforeJdkAdvice ----proxy----");
+	}
 
 	@Before("sayMethod()")
 	public void beforeAdvice(JoinPoint joinPoint){

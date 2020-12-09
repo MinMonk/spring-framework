@@ -9,7 +9,7 @@ public class CustomMapperScanTestMain {
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
 		applicationContext.register(AppConfig.class);
-		applicationContext.scan("com.monk.study.mapper");
+		applicationContext.scan("com.monk.study.custommapper");
 		applicationContext.register(CustomMapperScanConfig.class);
 
 		applicationContext.refresh();
