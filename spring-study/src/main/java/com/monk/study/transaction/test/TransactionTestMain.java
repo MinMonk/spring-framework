@@ -1,7 +1,8 @@
-package com.monk.study.transaction;
+package com.monk.study.transaction.test;
 
 import com.monk.study.config.AppConfig;
 import com.monk.study.config.TransactionAppConfig;
+import com.monk.study.transaction.UserDao;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.annotation.TransactionManagementConfigurationSelector;
 

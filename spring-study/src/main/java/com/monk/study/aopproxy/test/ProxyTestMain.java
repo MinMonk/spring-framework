@@ -1,5 +1,6 @@
-package com.monk.study.aopproxy;
+package com.monk.study.aopproxy.test;
 
+import com.monk.study.aopproxy.ProxyService;
 import com.monk.study.bean.User;
 import com.monk.study.config.AppConfig;
 import com.monk.study.config.ProxyAppConfig;

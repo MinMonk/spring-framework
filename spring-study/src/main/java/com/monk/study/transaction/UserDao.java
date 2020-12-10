@@ -25,7 +25,7 @@ public class UserDao {
 	@Transactional
 	public void insert(){
 		jdbcTemplate.execute("insert into test_user (id, name) values(1, \"zhangsan1\")");
-		int a = 100/0;
+		//int a = 100/0;
 	}
 
 	public void query(){

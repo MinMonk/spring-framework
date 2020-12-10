@@ -20,6 +20,15 @@ public class MyAspect {
 		System.out.println("beforeJdkAdvice ----proxy----");
 	}
 
+	/**
+	 * 是允许存在多个@before的，会存在顺序，顺序应该是根据方法名进行排序的
+	 * @param joinPoint
+	 */
+	@Before("jdkMethod()")
+	public void beforeJdkAdvice1(JoinPoint joinPoint){
+		System.out.println("beforeJdkAdvice1 ----proxy----");
+	}
+
 	@Before("sayMethod()")
 	public void beforeAdvice(JoinPoint joinPoint){
 		Object[] args = joinPoint.getArgs();

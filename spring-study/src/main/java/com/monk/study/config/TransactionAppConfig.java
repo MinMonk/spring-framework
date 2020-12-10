@@ -23,10 +23,17 @@ public class TransactionAppConfig {
 	@Bean
 	public DataSource dataSource() {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
+		/* mac上用的是docker上的mysql8.0.22版本镜像
 		dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		dataSource.setUrl("jdbc:mysql://127.0.0.1:3306/test_db?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true");
 		dataSource.setUsername("root");
-		dataSource.setPassword("AAaa1234");
+		dataSource.setPassword("AAaa1234");*/
+
+		// windows上用的docker上的mysql5.7版本镜像
+		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+		dataSource.setUrl("jdbc:mysql://192.168.94.200:3306/test_db?autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true");
+		dataSource.setUsername("root");
+		dataSource.setPassword("123456");
 
 		return dataSource;
 	}

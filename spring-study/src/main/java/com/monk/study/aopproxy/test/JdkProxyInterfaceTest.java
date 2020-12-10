@@ -1,5 +1,7 @@
-package com.monk.study.aopproxy;
+package com.monk.study.aopproxy.test;
 
+import com.monk.study.aopproxy.ProxyInterface;
+import com.monk.study.aopproxy.ProxyInterfaceImpl;
 import org.springframework.cglib.proxy.InvocationHandler;
 import org.springframework.cglib.proxy.Proxy;
 

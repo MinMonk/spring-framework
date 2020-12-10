@@ -1,7 +1,8 @@
-package com.monk.study.custommapper;
+package com.monk.study.custommapper.test;
 
 import com.monk.study.config.AppConfig;
 import com.monk.study.config.CustomMapperScanConfig;
+import com.monk.study.custommapper.UserMapper;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 public class CustomMapperScanTestMain {

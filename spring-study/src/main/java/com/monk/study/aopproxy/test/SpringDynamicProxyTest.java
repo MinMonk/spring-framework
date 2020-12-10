@@ -1,5 +1,7 @@
-package com.monk.study.aopproxy;
+package com.monk.study.aopproxy.test;
 
+import com.monk.study.aopproxy.ProxyService;
+import com.monk.study.aopproxy.ProxyServiceImpl;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.ProxyFactory;
 
