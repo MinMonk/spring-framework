@@ -280,6 +280,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				if (logger.isDebugEnabled()) {
 					logger.debug("Switching JDBC Connection [" + con + "] to manual commit");
 				}
+				// 设置AutoCommi为false
 				con.setAutoCommit(false);
 			}
 
@@ -293,6 +294,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 
 			// Bind the connection holder to the thread.
 			if (txObject.isNewConnectionHolder()) {
+				// 将新的连接对象存储到ThreadLocal<Map<Object, Object>> resources中，也正如spring自己的注释所说，绑定连接对象到当前线程
 				TransactionSynchronizationManager.bindResource(obtainDataSource(), txObject.getConnectionHolder());
 			}
 		}

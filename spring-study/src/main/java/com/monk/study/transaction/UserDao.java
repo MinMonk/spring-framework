@@ -23,8 +23,14 @@ public class UserDao {
 	}
 
 	@Transactional
-	public void insert(){
+	public void insert1(){
 		jdbcTemplate.execute("insert into test_user (id, name) values(1, \"zhangsan1\")");
+		//int a = 100/0;
+	}
+
+	@Transactional
+	public void insert2(){
+		jdbcTemplate.execute("insert into test_user (id, name) values(2, \"zhangsan2\")");
 		//int a = 100/0;
 	}
 
